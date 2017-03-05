@@ -6,7 +6,8 @@ described with a linear model. This technique belongs to the supervised learning
 
 The core idea behind this plugin is to utilize the index data in Elasticsearch during search 
 as a linear regression model in order to expose information like
-* prediction of a value for the target variable
-* anomaly detection
+
+* prediction of a value for the target variable,
+* anomaly detection,
 * measuring the accuracy or rather predictiveness of the model
 * and much more.
