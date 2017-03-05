@@ -1,0 +1,120 @@
+
+printf "Host: %s\nOS: %s %s %s\nJVM: %s %s %s %s\nGroovy: %s\nGradle: %s\n" +
+        "Build: group: ${project.group} name: ${project.name} version: ${project.version}\n",
+        InetAddress.getLocalHost(),
+        System.getProperty("os.name"),
+        System.getProperty("os.arch"),
+        System.getProperty("os.version"),
+        System.getProperty("java.version"),
+        System.getProperty("java.vm.version"),
+        System.getProperty("java.vm.vendor"),
+        System.getProperty("java.vm.name"),
+        GroovySystem.getVersion(),
+        gradle.gradleVersion
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+apply plugin: 'checkstyle'
+apply plugin: "jacoco"
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    wagon
+    distJars {
+        extendsFrom runtime
+        exclude group: 'org.elasticsearch'
+        exclude module: 'lucene-core'
+        exclude module: 'lucene-analyzers-common'
+        exclude module: 'jna'
+        exclude module: 'jackson-core'
+        exclude module: 'jackson-dataformat-smile'
+        exclude module: 'jackson-dataformat-yaml'
+        exclude module: 'jflex'
+    }
+}
+
+apply from: 'gradle/ext.gradle'
+
+dependencies {
+    compile "org.elasticsearch:elasticsearch:${project.property('elasticsearch.version')}"
+    compileOnly "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
+    testCompile "junit:junit:${project.property('junit.version')}"
+    testCompile "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
+    wagon "org.apache.maven.wagon:wagon-ssh-external:${project.property('wagon-ssh-external.version')}"
+    distJars "${project.group}:${project.name}:${project.version}"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:all" << "-profile" << "compact1"
+}
+
+test {
+    systemProperties['path.home'] = System.getProperty("user.dir")
+    testLogging {
+        showStandardStreams = false
+        exceptionFormat = 'full'
+    }
+}
+
+task makePluginDescriptor(type: Copy) {
+    from 'src/main/templates'
+    into 'build/tmp/plugin'
+    expand([
+            'descriptor': [
+                'name': pluginName,
+                'classname': pluginClassname,
+                'description': pluginDescription,
+                'jvm': true,
+                'site': false,
+                'isolated': true,
+                'version': project.property('version'),
+                'javaVersion': project.property('targetCompatibility'),
+                'elasticsearchVersion' : project.property('elasticsearch.version')
+            ]
+    ])
+}
+
+task buildPluginZip(type: Zip, dependsOn: [':jar', ':makePluginDescriptor']) {
+    from configurations.distJars
+    from 'build/tmp/plugin'
+    into 'elasticsearch'
+    classifier 'plugin'
+}
+
+task unpackPlugin(type: Copy, dependsOn: [':buildPluginZip']) {
+    delete "plugins"
+    from configurations.distJars
+    from 'build/tmp/plugin'
+    into "plugins/${pluginName}"
+}
+
+clean {
+    delete "plugins"
+    delete "logs"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    into "build/tmp"
+    classifier 'sources'
+}
+
+artifacts {
+    archives sourcesJar, buildPluginZip
+}
+
+if (project.hasProperty('signing.keyId')) {
+    signing {
+        sign configurations.archives
+    }
+}

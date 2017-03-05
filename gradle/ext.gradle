@@ -1,0 +1,10 @@
+ext {
+    pluginName = 'linear-regression'
+    pluginClassname  = 'org.scaleborn.elasticsearch.linreg.LinearRegressionPlugin'
+    pluginDescription = 'Linear regression aggregations for Elasticsearch'
+    user = 'scaleborn'
+    name = 'elasticsearch-linear-regression'
+    scmUrl = 'https://github.com/' + user + '/' + name
+    scmConnection = 'scm:git:git://github.com/' + user + '/' + name + '.git'
+    scmDeveloperConnection = 'scm:git:git://github.com/' + user + '/' + name + '.git'
+}
