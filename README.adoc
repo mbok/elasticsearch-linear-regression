@@ -1,12 +1,15 @@
 # A linear regression plugin for Elasticsearch
 
+image:https://travis-ci.org/scaleborn/elasticsearch-linear-regression.svg?branch=master["Build Status", link="https://travis-ci.org/scaleborn/elasticsearch-linear-regression"]
+
 Linear regression is one of the most well known algorithms in machine learning. It defines a predictive model for the value
 of a dependent variable based on a training data set of independent variables when the relationship between the variables can be
 described with a linear model. This technique belongs to the supervised learning algorithms in machine learning.
 
 The core idea behind this plugin is to utilize the index data in Elasticsearch during search 
 as a linear regression model in order to expose information like
-* prediction of a value for the target variable
-* anomaly detection
+
+* prediction of a value for the target variable,
+* anomaly detection,
 * measuring the accuracy or rather predictiveness of the model
 * and much more.
