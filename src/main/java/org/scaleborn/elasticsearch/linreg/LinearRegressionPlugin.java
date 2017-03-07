@@ -5,22 +5,23 @@ import java.util.List;
 
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
-import org.elasticsearch.search.aggregations.metrics.stats.InternalStats;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.scaleborn.elasticsearch.linreg.aggregation.predict.InternalPrediction;
+import org.scaleborn.elasticsearch.linreg.aggregation.predict.PredictAggregationBuilder;
 
 public class LinearRegressionPlugin extends Plugin implements SearchPlugin {
 
-	@Override
-	public List<AggregationSpec> getAggregations() {
-		AggregationSpec predict = new AggregationSpec(StatsAggregationBuilder.NAME, StatsAggregationBuilder::new, StatsAggregationBuilder::parse)
-        .addResultReader(InternalStats::new);
-		return Arrays.asList(predict);
-	}
+  @Override
+  public List<AggregationSpec> getAggregations() {
+    AggregationSpec predict = new AggregationSpec(PredictAggregationBuilder.NAME,
+        PredictAggregationBuilder::new, PredictAggregationBuilder::parse)
+        .addResultReader(InternalPrediction::new);
+    return Arrays.asList(predict);
+  }
 
-	@Override
-	public List<PipelineAggregationSpec> getPipelineAggregations() {
-		// TODO Auto-generated method stub
-		return SearchPlugin.super.getPipelineAggregations();
-	}
+  @Override
+  public List<PipelineAggregationSpec> getPipelineAggregations() {
+    // TODO Auto-generated method stub
+    return SearchPlugin.super.getPipelineAggregations();
+  }
 
 }

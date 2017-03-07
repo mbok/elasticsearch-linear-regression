@@ -118,3 +118,7 @@ if (project.hasProperty('signing.keyId')) {
         sign configurations.archives
     }
 }
+
+checkstyle {
+    toolVersion = "7.6"
+}
