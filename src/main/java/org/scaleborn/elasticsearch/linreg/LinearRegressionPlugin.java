@@ -2,7 +2,6 @@ package org.scaleborn.elasticsearch.linreg;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
 import org.scaleborn.elasticsearch.linreg.aggregation.predict.InternalPrediction;

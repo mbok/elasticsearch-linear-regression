@@ -16,78 +16,78 @@ import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 public class InternalPrediction extends InternalNumericMetricsAggregation.MultiValue implements
     Prediction {
 
-    private final long count;
+  private final long count;
 
-    public InternalPrediction(String name, long count,
-        List<PipelineAggregator> pipelineAggregators,
-        Map<String, Object> metaData) {
-        super(name, pipelineAggregators, metaData);
-        this.count = count;
+  public InternalPrediction(String name, long count,
+      List<PipelineAggregator> pipelineAggregators,
+      Map<String, Object> metaData) {
+    super(name, pipelineAggregators, metaData);
+    this.count = count;
+  }
+
+  public InternalPrediction(StreamInput in) throws IOException {
+    super(in);
+    count = in.readLong();
+  }
+
+  @Override
+  public double value(String name) {
+    return 0;
+  }
+
+  @Override
+  protected void doWriteTo(StreamOutput out) throws IOException {
+    out.writeLong(count);
+  }
+
+  @Override
+  public InternalAggregation doReduce(List<InternalAggregation> aggregations,
+      ReduceContext reduceContext) {
+    long count = 0;
+    for (InternalAggregation aggregation : aggregations) {
+      count += ((InternalPrediction) aggregation).count;
+    }
+    return new InternalPrediction(getName(), count, pipelineAggregators(), getMetaData());
+  }
+
+  @Override
+  public XContentBuilder doXContentBody(XContentBuilder builder, Params params)
+      throws IOException {
+    builder.field(Fields.PREDICTION, getPrediction());
+    return builder;
+  }
+
+  @Override
+  public String getWriteableName() {
+    return PredictAggregationBuilder.NAME;
+  }
+
+  @Override
+  public double getPrediction() {
+    return count / 2;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof InternalPrediction)) {
+      return false;
     }
 
-    public InternalPrediction(StreamInput in) throws IOException {
-        super(in);
-        count = in.readLong();
-    }
+    InternalPrediction that = (InternalPrediction) o;
 
-    @Override
-    public double value(String name) {
-        return 0;
-    }
+    return count == that.count;
+  }
 
-    @Override
-    protected void doWriteTo(StreamOutput out) throws IOException {
-        out.writeLong(count);
-    }
+  @Override
+  public int hashCode() {
+    return (int) (count ^ (count >>> 32));
+  }
 
-    @Override
-    public InternalAggregation doReduce(List<InternalAggregation> aggregations,
-        ReduceContext reduceContext) {
-        long count = 0;
-        for (InternalAggregation aggregation : aggregations) {
-            count += ((InternalPrediction) aggregation).count;
-        }
-        return new InternalPrediction(getName(), count, pipelineAggregators(), getMetaData());
-    }
+  static class Fields {
 
-    @Override
-    public XContentBuilder doXContentBody(XContentBuilder builder, Params params)
-        throws IOException {
-        builder.field(Fields.PREDICTION, getPrediction());
-        return builder;
-    }
-
-    @Override
-    public String getWriteableName() {
-        return PredictAggregationBuilder.NAME;
-    }
-
-    @Override
-    public double getPrediction() {
-        return count / 2;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof InternalPrediction)) {
-            return false;
-        }
-
-        InternalPrediction that = (InternalPrediction) o;
-
-        return count == that.count;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (count ^ (count >>> 32));
-    }
-
-    static class Fields {
-
-        public static final String PREDICTION = "prediction";
-    }
+    public static final String PREDICTION = "prediction";
+  }
 }
