@@ -1,4 +1,3 @@
-
 printf "Host: %s\nOS: %s %s %s\nJVM: %s %s %s %s\nGroovy: %s\nGradle: %s\n" +
         "Build: group: ${project.group} name: ${project.name} version: ${project.version}\n",
         InetAddress.getLocalHost(),
@@ -44,8 +43,9 @@ apply from: 'gradle/ext.gradle'
 dependencies {
     compile "org.elasticsearch:elasticsearch:${project.property('elasticsearch.version')}"
     compileOnly "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
-    testCompile "junit:junit:${project.property('junit.version')}"
     testCompile "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
+    testCompile("org.elasticsearch.test:framework:${project.property('elasticsearch.version')}") {
+    }
     wagon "org.apache.maven.wagon:wagon-ssh-external:${project.property('wagon-ssh-external.version')}"
     distJars "${project.group}:${project.name}:${project.version}"
 }
@@ -71,15 +71,15 @@ task makePluginDescriptor(type: Copy) {
     into 'build/tmp/plugin'
     expand([
             'descriptor': [
-                'name': pluginName,
-                'classname': pluginClassname,
-                'description': pluginDescription,
-                'jvm': true,
-                'site': false,
-                'isolated': true,
-                'version': project.property('version'),
-                'javaVersion': project.property('targetCompatibility'),
-                'elasticsearchVersion' : project.property('elasticsearch.version')
+                    'name'                : pluginName,
+                    'classname'           : pluginClassname,
+                    'description'         : pluginDescription,
+                    'jvm'                 : true,
+                    'site'                : false,
+                    'isolated'            : true,
+                    'version'             : project.property('version'),
+                    'javaVersion'         : project.property('targetCompatibility'),
+                    'elasticsearchVersion': project.property('elasticsearch.version')
             ]
     ])
 }
