@@ -60,7 +60,7 @@ tasks.withType(JavaCompile) {
 test {
     systemProperties['path.home'] = System.getProperty("user.dir")
     testLogging {
-        showStandardStreams = false
+        showStandardStreams = true
         exceptionFormat = 'full'
     }
 }
@@ -120,4 +120,8 @@ if (project.hasProperty('signing.keyId')) {
 
 checkstyle {
     toolVersion = "7.6"
+}
+
+test {
+    testLogging.showStandardStreams = true
 }
