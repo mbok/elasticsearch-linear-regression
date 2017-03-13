@@ -121,7 +121,3 @@ if (project.hasProperty('signing.keyId')) {
 checkstyle {
     toolVersion = "7.6"
 }
-
-test {
-    testLogging.showStandardStreams = true
-}
