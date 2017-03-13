@@ -59,6 +59,7 @@ tasks.withType(JavaCompile) {
 
 test {
     systemProperties['path.home'] = System.getProperty("user.dir")
+    jvmArgs '-Dtests.security.manager=false'
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
