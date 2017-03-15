@@ -10,12 +10,12 @@ import org.scaleborn.elasticsearch.linreg.sampling.SamplingData;
  */
 public class ExactSamplingData extends SamplingData {
 
-  public ExactSamplingData(int inputCount) {
-    super(inputCount);
+  public ExactSamplingData(int featuresCount) {
+    super(featuresCount);
   }
 
   @Override
-  protected void doSample(double[] inputs) {
+  protected void doSample(double[] featureValues, double targetValue) {
 
   }
 
@@ -23,4 +23,10 @@ public class ExactSamplingData extends SamplingData {
   public void doMerge(SamplingData from, SamplingData to) {
 
   }
+
+  @Override
+  public double[][] getCovarianceMatrix() {
+    return new double[0][];
+  }
+
 }
