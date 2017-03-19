@@ -41,6 +41,7 @@ apply from: 'gradle/ext.gradle'
 
 dependencies {
     compile "org.elasticsearch:elasticsearch:${project.property('elasticsearch.version')}"
+    compile "org.apache.commons:commons-math3:${project.property('commons-math3.version')}"
     compileOnly "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
     testCompile "org.apache.logging.log4j:log4j-core:${project.property('log4j.version')}"
     testCompile("org.elasticsearch.test:framework:${project.property('elasticsearch.version')}") {

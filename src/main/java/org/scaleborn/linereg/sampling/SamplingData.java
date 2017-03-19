@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.scaleborn.elasticsearch.linreg.sampling;
+package org.scaleborn.linereg.sampling;
+
+import org.scaleborn.linereg.evaluation.SampledData;
 
 /**
  * SamplingData data over the result set for building the linear model.
  * Created by mbok on 12.03.17.
  */
-public abstract class SamplingData {
+public abstract class SamplingData implements SampledData {
 
   protected int featuresCount;
   protected long count = 0;
@@ -62,9 +64,11 @@ public abstract class SamplingData {
 
   public abstract void doMerge(SamplingData from);
 
-  public abstract double[][] getCovarianceMatrix();
+  @Override
+  public abstract double[][] getCovarianceLowerTriangularMatrix();
 
-  public double[] getAverages() {
+  @Override
+  public double[] getFeatureAverages() {
     double[] avgs = new double[featuresCount];
     if (count > 0) {
       for (int i = 0; i < featuresCount; i++) {
@@ -74,27 +78,40 @@ public abstract class SamplingData {
     return avgs;
   }
 
+  @Override
+  public double getTargetAverage() {
+    if (count > 0) {
+      return targetSum / count;
+    }
+    return 0;
+  }
 
+  @Override
   public int getFeaturesCount() {
     return featuresCount;
   }
 
+  @Override
   public long getCount() {
     return count;
   }
 
+  @Override
   public double[] getFeatureSums() {
     return featureSums;
   }
 
+  @Override
   public double[] getFeatureTargetProductSums() {
     return featureTargetProductSums;
   }
 
+  @Override
   public double getTargetSum() {
     return targetSum;
   }
 
+  @Override
   public double getTargetSquareSum() {
     return targetSquareSum;
   }

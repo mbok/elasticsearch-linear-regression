@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.scaleborn.elasticsearch.linreg.sampling.exact;
+package org.scaleborn.linereg.sampling.exact;
 
-import org.scaleborn.elasticsearch.linreg.sampling.SamplingData;
+import org.scaleborn.linereg.sampling.SamplingData;
 
 /**
  * Sampling data for a linear model where the covariance matrix is solved exactly. Doing this that
@@ -57,14 +57,16 @@ public class ExactSamplingData extends SamplingData {
   }
 
   @Override
-  public double[][] getCovarianceMatrix() {
+  public double[][] getCovarianceLowerTriangularMatrix() {
     double[][] covMatrix = new double[featuresCount][];
-    double[] avgs = getAverages();
+    double[] averages = getFeatureAverages();
     for (int i = 0; i < featuresCount; i++) {
-      double avgI = avgs[i];
+      double avgI = averages[i];
       covMatrix[i] = new double[featuresCount];
-      for (int j = 0; j < featuresCount; j++) {
-        double avgJ = avgs[j];
+      // Iterate until "i" due to the covariance matrix is symmetric and
+      // build only the lower triangle
+      for (int j = 0; j <= i; j++) {
+        double avgJ = averages[j];
         covMatrix[i][j] = featuresProductSums[i][j] - avgI * featureSums[j] - avgJ * featureSums[i]
             + count * avgI * avgJ;
       }
