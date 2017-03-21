@@ -52,7 +52,7 @@ public class CommonsMathSolver implements DerivationEquationSolver {
     RealMatrix coefficients =
         new Array2DRowRealMatrix(matrix, false);
     DecompositionSolver solver = new CholeskyDecomposition(coefficients).getSolver();
-    RealVector constants = new ArrayRealVector(eq.getConstraints(), false);
+    RealVector constants = new ArrayRealVector(eq.getConstraints(), true);
     RealVector solution = solver.solve(constants);
     return solution.toArray();
   }

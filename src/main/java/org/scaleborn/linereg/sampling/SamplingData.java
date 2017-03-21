@@ -16,8 +16,6 @@
 
 package org.scaleborn.linereg.sampling;
 
-import org.scaleborn.linereg.evaluation.SampledData;
-
 /**
  * SamplingData data over the result set for building the linear model.
  * Created by mbok on 12.03.17.
@@ -94,11 +92,6 @@ public abstract class SamplingData implements SampledData {
   @Override
   public long getCount() {
     return count;
-  }
-
-  @Override
-  public double[] getFeatureSums() {
-    return featureSums;
   }
 
   @Override

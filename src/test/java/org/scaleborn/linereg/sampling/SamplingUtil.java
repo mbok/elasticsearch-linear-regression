@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation.sampling;
-
-import org.scaleborn.linereg.sampling.SamplingData;
+package org.scaleborn.linereg.sampling;
 
 /**
  * Util for working in tests with sampled data.

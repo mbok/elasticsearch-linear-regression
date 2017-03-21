@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.scaleborn.linereg.sampling;
 
 /**
  * Created by mbok on 17.03.17.
@@ -24,8 +24,6 @@ public interface SampledData {
   int getFeaturesCount();
 
   long getCount();
-
-  double[] getFeatureSums();
 
   double[] getFeatureTargetProductSums();
 

@@ -16,6 +16,8 @@
 
 package org.scaleborn.linereg.evaluation;
 
+import org.scaleborn.linereg.sampling.SampledData;
+
 /**
  * Created by mbok on 17.03.17.
  */

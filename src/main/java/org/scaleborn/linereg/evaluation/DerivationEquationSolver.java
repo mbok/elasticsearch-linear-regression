@@ -27,7 +27,8 @@ public interface DerivationEquationSolver {
    * Solves the derivation equation and returns the coefficients for the best fit prediction
    * equation.
    *
-   * @param eq the derivation equation to solve
+   * @param eq the derivation equation to solve. The input parameter should remain unchanged for
+   * further calculations.
    * @return the slope coefficients (excluding the intercept) for the best fit prediction equation
    */
   double[] solveCoefficients(DerivationEquation eq);
