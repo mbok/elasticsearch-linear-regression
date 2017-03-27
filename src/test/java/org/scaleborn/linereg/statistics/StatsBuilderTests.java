@@ -18,10 +18,8 @@ package org.scaleborn.linereg.statistics;
 
 import org.elasticsearch.test.ESTestCase;
 import org.junit.Test;
-import org.scaleborn.linereg.Model;
 import org.scaleborn.linereg.TestModels;
 import org.scaleborn.linereg.TestModels.TestModel;
-import org.scaleborn.linereg.sampling.SampledData;
 
 /**
  * Tests for {@link StatsBuilder}.
@@ -37,7 +35,7 @@ public class StatsBuilderTests extends ESTestCase {
   }
 
   private void testStatsForModel(final TestModel testModel) {
-    Model<SampledData> linearModel = testModel.evaluateModel();
+    StatsModel linearModel = testModel.evaluateModel();
     Statistics statistics = new StatsBuilder().buildStats(linearModel);
     testModel.assertStatistics(statistics);
   }

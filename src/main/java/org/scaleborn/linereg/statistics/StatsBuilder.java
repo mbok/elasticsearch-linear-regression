@@ -16,45 +16,38 @@
 
 package org.scaleborn.linereg.statistics;
 
-import org.scaleborn.linereg.Model;
-import org.scaleborn.linereg.sampling.SampledData;
-
 /**
  * Created by mbok on 19.03.17.
  */
 public class StatsBuilder {
 
-  Statistics buildStats(final Model<SampledData> model) {
-    final SampledData sampledData = model.getSampledData();
-    int featuresCount = sampledData.getFeaturesCount();
-    double squaredError =
-        sampledData.getTargetSquareSum() - (2 * (sampledData.getTargetAverage() * sampledData
-            .getTargetSum()));
-
-    double[] deConstraints = model.getDerivationEquation().getConstraints();
-    double[][] deMatrix = model.getDerivationEquation().getCovarianceLowerTriangularMatrix();
+  Statistics buildStats(final StatsModel model) {
+    int featuresCount = model.getSamplingContext().getFeaturesCount();
+    double[] featuresResponseCovariance = model.getCoefficientLinearTerm()
+        .getFeaturesResponseCovariance();
+    double[][] covarianceLowerTriangularMatrix = model.getCoefficientSquareTerm()
+        .getCovarianceLowerTriangularMatrix();
     double[] slopeCoefficients = model.getSlopeCoefficients();
+
+    double squaredError = model.getResponseVarianceTerm().getResponseVariance();
+
     for (int i = 0; i < featuresCount; i++) {
       double c = slopeCoefficients[i];
       double c2 = c * c;
-      // Add values from derivation equation constraint
-      // Double and negate, because the derivation equation is normalized
-      squaredError -= 2 * deConstraints[i] * c;
+      // Minus double of feature response coefficient
+      squaredError -= 2 * featuresResponseCovariance[i] * c;
 
       // Add values from covariance matrix of the derivation matrix
       for (int j = 0; j <= i; j++) {
         if (i == j) {
           // Variance term
-          squaredError += c2 * deMatrix[i][j];
+          squaredError += c2 * covarianceLowerTriangularMatrix[i][j];
         } else {
           // Covariance term
-          squaredError += 2 * c * slopeCoefficients[j] * deMatrix[i][j];
+          squaredError += 2 * c * slopeCoefficients[j] * covarianceLowerTriangularMatrix[i][j];
         }
       }
     }
-    double ic = sampledData.getTargetSum();
-    ic *= ic;
-    squaredError += ic / sampledData.getCount();
     final double rss = squaredError;
     return new Statistics() {
       @Override
@@ -64,7 +57,7 @@ public class StatsBuilder {
 
       @Override
       public double getMse() {
-        return rss / sampledData.getCount();
+        return rss / model.getSamplingContext().getCount();
       }
     };
   }

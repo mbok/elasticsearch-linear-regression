@@ -22,11 +22,16 @@ import static org.scaleborn.linereg.sampling.SamplingUtil.fillWithObservations;
 import org.scaleborn.linereg.evaluation.DerivationEquation;
 import org.scaleborn.linereg.evaluation.DerivationEquationBuilder;
 import org.scaleborn.linereg.evaluation.commons.CommonsMathSolver;
-import org.scaleborn.linereg.sampling.SampledData;
-import org.scaleborn.linereg.sampling.SamplingData;
-import org.scaleborn.linereg.sampling.exact.ExactSamplingData;
+import org.scaleborn.linereg.sampling.Sampler;
+import org.scaleborn.linereg.sampling.Sampler.CoefficientLinearTermSampler;
+import org.scaleborn.linereg.sampling.Sampler.CoefficientSquareTermSampler;
+import org.scaleborn.linereg.sampling.Sampler.ResponseVarianceTermSampler;
+import org.scaleborn.linereg.sampling.SamplerBuilder;
+import org.scaleborn.linereg.sampling.exact.ExactModelSamplerFactory;
+import org.scaleborn.linereg.sampling.exact.ExactSamplingContext;
 import org.scaleborn.linereg.statistics.Statistics;
 import org.scaleborn.linereg.statistics.Statistics.DefaultStatistics;
+import org.scaleborn.linereg.statistics.StatsModel;
 
 /**
  * Created by mbok on 19.03.17.
@@ -42,6 +47,11 @@ public class TestModels {
     final double[][] observations;
     private Statistics expectedStatistics;
     private double[] expectedSlopeCoefficients;
+    private ExactSamplingContext samplingContext;
+    private ResponseVarianceTermSampler<?> responseVarianceTermSampler;
+    private CoefficientLinearTermSampler<?> coefficientLinearTermSampler;
+    private CoefficientSquareTermSampler<?> coefficientSquareTermSampler;
+    private DerivationEquation equation;
 
     public TestModel(final int featureCount, final double[][] observations,
         double[] expectedSlopeCoefficients,
@@ -50,6 +60,25 @@ public class TestModels {
       this.observations = observations;
       this.expectedStatistics = statistics;
       this.expectedSlopeCoefficients = expectedSlopeCoefficients;
+
+      sample();
+    }
+
+    private void sample() {
+      ExactModelSamplerFactory f = new ExactModelSamplerFactory();
+      samplingContext = f.createContext(featureCount);
+      responseVarianceTermSampler = f
+          .createResponseVarianceTermSampler(samplingContext);
+      coefficientLinearTermSampler = f
+          .createCoefficientLinearTermSampler(samplingContext);
+      coefficientSquareTermSampler = f
+          .createCoefficientSquareTermSampler(samplingContext);
+      Sampler<?> sampler = SamplerBuilder.forContext(samplingContext)
+          .addSampler(responseVarianceTermSampler).addSampler(coefficientLinearTermSampler)
+          .addSampler(coefficientSquareTermSampler).build();
+      fillWithObservations(sampler, observations);
+      equation = new DerivationEquationBuilder()
+          .buildDerivationEquation(coefficientLinearTermSampler, coefficientSquareTermSampler);
     }
 
     public double[] getExpectedSlopeCoefficients() {
@@ -60,18 +89,15 @@ public class TestModels {
       return expectedStatistics;
     }
 
-    public SampledData getSampledData() {
-      SamplingData sd = new ExactSamplingData(featureCount);
-      fillWithObservations(sd, observations);
-      return sd;
+    public DerivationEquation getEquation() {
+      return equation;
     }
 
-    public Model<SampledData> evaluateModel() {
-      SampledData sd = getSampledData();
-      DerivationEquation equation = new DerivationEquationBuilder()
-          .buildDerivationEquation(sd);
+    public StatsModel evaluateModel() {
       double[] coefficients = new CommonsMathSolver().solveCoefficients(equation);
-      return new Model<>(sd, equation, coefficients);
+      return new StatsModel(samplingContext, responseVarianceTermSampler,
+          coefficientLinearTermSampler,
+          coefficientSquareTermSampler, coefficients);
     }
 
     public void assertCoefficients(double[] givenCoefficients, double delta) {

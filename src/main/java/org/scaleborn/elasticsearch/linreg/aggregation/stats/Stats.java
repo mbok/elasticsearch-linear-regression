@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.sampling;
+package org.scaleborn.elasticsearch.linreg.aggregation.stats;
+
+import org.scaleborn.linereg.statistics.Statistics;
 
 /**
- * Created by mbok on 17.03.17.
+ * Created by mbok on 21.03.17.
  */
-public interface SampledData {
+public interface Stats extends Statistics {
 
-  int getFeaturesCount();
-
-  long getCount();
-
-  double[] getFeatureTargetProductSums();
-
-  double getTargetSum();
-
-  double getTargetSquareSum();
-
-  double[][] getCovarianceLowerTriangularMatrix();
-
-  double[] getFeatureAverages();
-
-  double getTargetAverage();
 }
