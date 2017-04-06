@@ -16,15 +16,17 @@
 
 package org.scaleborn.linereg.sampling.exact;
 
-import org.scaleborn.linereg.sampling.ModelSamplerFactory;
-import org.scaleborn.linereg.sampling.Sampler.CoefficientLinearTermSampler;
-import org.scaleborn.linereg.sampling.Sampler.CoefficientSquareTermSampler;
-import org.scaleborn.linereg.sampling.Sampler.ResponseVarianceTermSampler;
+import org.scaleborn.linereg.sampling.ModelSamplingFactory;
+import org.scaleborn.linereg.sampling.Sampling.CoefficientLinearTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.ResponseVarianceTermSampling;
+import org.scaleborn.linereg.sampling.io.StateInputStream;
+import org.scaleborn.linereg.sampling.io.StateOutputStream;
 
 /**
  * Created by mbok on 26.03.17.
  */
-public class ExactModelSamplerFactory implements ModelSamplerFactory<ExactSamplingContext> {
+public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamplingContext> {
 
   @Override
   public ExactSamplingContext createContext(final int featuresCount) {
@@ -32,17 +34,17 @@ public class ExactModelSamplerFactory implements ModelSamplerFactory<ExactSampli
   }
 
   @Override
-  public ResponseVarianceTermSampler<?> createResponseVarianceTermSampler(
+  public ResponseVarianceTermSampling<?> createResponseVarianceTermSampling(
       final ExactSamplingContext context) {
-    return new ExactResponseVarianceTermSampler(context);
+    return new ExactResponseVarianceTermSampling(context);
   }
 
-  private static class ExactResponseVarianceTermSampler implements
-      ResponseVarianceTermSampler<ExactResponseVarianceTermSampler> {
+  private static class ExactResponseVarianceTermSampling implements
+      ResponseVarianceTermSampling<ExactResponseVarianceTermSampling> {
 
     private ExactSamplingContext context;
 
-    public ExactResponseVarianceTermSampler(
+    public ExactResponseVarianceTermSampling(
         final ExactSamplingContext context) {
       this.context = context;
     }
@@ -59,23 +61,33 @@ public class ExactModelSamplerFactory implements ModelSamplerFactory<ExactSampli
     }
 
     @Override
-    public void merge(final ExactResponseVarianceTermSampler fromSample) {
+    public void merge(final ExactResponseVarianceTermSampling fromSample) {
       // Nothing to merge, covered by ExactSamplingContext
+    }
+
+    @Override
+    public void saveState(final StateOutputStream destination) {
+      // No state
+    }
+
+    @Override
+    public void loadState(final StateInputStream source) {
+      // No state
     }
   }
 
   @Override
-  public CoefficientLinearTermSampler<?> createCoefficientLinearTermSampler(
+  public CoefficientLinearTermSampling<?> createCoefficientLinearTermSampling(
       final ExactSamplingContext context) {
-    return new ExactCoefficientLinearTermSampler(context);
+    return new ExactCoefficientLinearTermSampling(context);
   }
 
-  private static class ExactCoefficientLinearTermSampler implements
-      CoefficientLinearTermSampler<ExactCoefficientLinearTermSampler> {
+  private static class ExactCoefficientLinearTermSampling implements
+      CoefficientLinearTermSampling<ExactCoefficientLinearTermSampling> {
 
     private ExactSamplingContext context;
 
-    public ExactCoefficientLinearTermSampler(
+    public ExactCoefficientLinearTermSampling(
         final ExactSamplingContext context) {
       this.context = context;
     }
@@ -105,15 +117,25 @@ public class ExactModelSamplerFactory implements ModelSamplerFactory<ExactSampli
     }
 
     @Override
-    public void merge(final ExactCoefficientLinearTermSampler fromSample) {
+    public void merge(final ExactCoefficientLinearTermSampling fromSample) {
       // Nothing to merge, covered by ExactSamplingContext
+    }
+
+    @Override
+    public void saveState(final StateOutputStream destination) {
+      // No state
+    }
+
+    @Override
+    public void loadState(final StateInputStream source) {
+      // No state
     }
   }
 
   @Override
 
-  public CoefficientSquareTermSampler<?> createCoefficientSquareTermSampler(
+  public CoefficientSquareTermSampling<?> createCoefficientSquareTermSampling(
       final ExactSamplingContext context) {
-    return new ExactCoefficientSquareTermSampler(context);
+    return new ExactCoefficientSquareTermSampling(context);
   }
 }

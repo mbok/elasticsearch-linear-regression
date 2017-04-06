@@ -21,15 +21,15 @@ package org.scaleborn.linereg.statistics;
  */
 public class StatsBuilder {
 
-  Statistics buildStats(final StatsModel model) {
-    int featuresCount = model.getSamplingContext().getFeaturesCount();
-    double[] featuresResponseCovariance = model.getCoefficientLinearTerm()
+  public Statistics buildStats(final StatsModel model) {
+    int featuresCount = model.getStatsSampling().getFeaturesCount();
+    double[] featuresResponseCovariance = model.getStatsSampling()
         .getFeaturesResponseCovariance();
-    double[][] covarianceLowerTriangularMatrix = model.getCoefficientSquareTerm()
+    double[][] covarianceLowerTriangularMatrix = model.getStatsSampling()
         .getCovarianceLowerTriangularMatrix();
-    double[] slopeCoefficients = model.getSlopeCoefficients();
+    double[] slopeCoefficients = model.getSlopeCoefficients().getCoefficients();
 
-    double squaredError = model.getResponseVarianceTerm().getResponseVariance();
+    double squaredError = model.getStatsSampling().getResponseVariance();
 
     for (int i = 0; i < featuresCount; i++) {
       double c = slopeCoefficients[i];
@@ -57,7 +57,7 @@ public class StatsBuilder {
 
       @Override
       public double getMse() {
-        return rss / model.getSamplingContext().getCount();
+        return rss / model.getStatsSampling().getCount();
       }
     };
   }

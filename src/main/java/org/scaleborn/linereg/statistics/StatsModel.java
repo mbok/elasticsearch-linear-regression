@@ -16,11 +16,7 @@
 
 package org.scaleborn.linereg.statistics;
 
-import java.util.Arrays;
-import org.scaleborn.linereg.sampling.CoefficientLinearTerm;
-import org.scaleborn.linereg.sampling.CoefficientSquareTerm;
-import org.scaleborn.linereg.sampling.ResponseVarianceTerm;
-import org.scaleborn.linereg.sampling.SamplingContext;
+import org.scaleborn.linereg.evaluation.SlopeCoefficients;
 
 /**
  * Bean for evaluated linear model fitting best the sampled data regarding
@@ -30,51 +26,29 @@ import org.scaleborn.linereg.sampling.SamplingContext;
  */
 public class StatsModel {
 
-  private SamplingContext<?> samplingContext;
-  private ResponseVarianceTerm responseVarianceTerm;
-  private CoefficientLinearTerm coefficientLinearTerm;
-  private CoefficientSquareTerm coefficientSquareTerm;
-  private double[] slopeCoefficients;
+  private StatsSampling<?> statsSampling;
+  private SlopeCoefficients slopeCoefficients;
 
-  public StatsModel(final SamplingContext<?> samplingContext,
-      final ResponseVarianceTerm responseVarianceTerm,
-      final CoefficientLinearTerm coefficientLinearTerm,
-      final CoefficientSquareTerm coefficientSquareTerm, final double[] slopeCoefficients) {
-    this.samplingContext = samplingContext;
-    this.responseVarianceTerm = responseVarianceTerm;
-    this.coefficientLinearTerm = coefficientLinearTerm;
-    this.coefficientSquareTerm = coefficientSquareTerm;
+  public StatsModel(final StatsSampling<?> statsSampling,
+      final SlopeCoefficients slopeCoefficients) {
+    this.statsSampling = statsSampling;
     this.slopeCoefficients = slopeCoefficients;
   }
 
-  public SamplingContext<?> getSamplingContext() {
-    return samplingContext;
+  public StatsSampling<?> getStatsSampling() {
+    return statsSampling;
   }
 
-  public ResponseVarianceTerm getResponseVarianceTerm() {
-    return responseVarianceTerm;
-  }
 
-  public CoefficientLinearTerm getCoefficientLinearTerm() {
-    return coefficientLinearTerm;
-  }
-
-  public CoefficientSquareTerm getCoefficientSquareTerm() {
-    return coefficientSquareTerm;
-  }
-
-  public double[] getSlopeCoefficients() {
+  public SlopeCoefficients getSlopeCoefficients() {
     return slopeCoefficients;
   }
 
   @Override
   public String toString() {
     return "StatsModel{" +
-        "samplingContext=" + samplingContext +
-        ", responseVarianceTerm=" + responseVarianceTerm +
-        ", coefficientLinearTerm=" + coefficientLinearTerm +
-        ", coefficientSquareTerm=" + coefficientSquareTerm +
-        ", slopeCoefficients=" + Arrays.toString(slopeCoefficients) +
+        "statsSampling=" + statsSampling +
+        ", slopeCoefficients=" + slopeCoefficients +
         '}';
   }
 }

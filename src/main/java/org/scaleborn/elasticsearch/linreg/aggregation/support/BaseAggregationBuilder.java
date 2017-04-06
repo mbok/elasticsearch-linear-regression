@@ -17,145 +17,86 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
-import org.elasticsearch.search.aggregations.InternalAggregation.Type;
+import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregationBuilder;
+import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
+import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
 import org.elasticsearch.search.aggregations.support.ValueType;
+import org.elasticsearch.search.aggregations.support.ValuesSource;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
-import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
+import org.elasticsearch.search.aggregations.support.ValuesSourceType;
 import org.elasticsearch.search.internal.SearchContext;
 
 /**
  * Created by mbok on 22.03.17.
  */
-public abstract class BaseAggregationBuilder<AB extends BaseAggregationBuilder<AB>> extends
-    AbstractAggregationBuilder<AB> {
+public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>> extends
+    MultiValuesSourceAggregationBuilder.LeafOnly<ValuesSource.Numeric, S> {
 
-  private List<String> featureFields;
-  private String responseField;
+  private MultiValueMode multiValueMode = MultiValueMode.AVG;
 
-  public BaseAggregationBuilder(final String name,
-      final Type type) {
-    super(name, type);
+  public S multiValueMode(MultiValueMode multiValueMode) {
+    this.multiValueMode = multiValueMode;
+    //noinspection unchecked
+    return (S) this;
   }
 
-  protected BaseAggregationBuilder(final StreamInput in,
-      final Type type) throws IOException {
-    super(in, type);
-    read(in);
+  public MultiValueMode multiValueMode() {
+    return this.multiValueMode;
+  }
+
+  public BaseAggregationBuilder(String name) {
+    super(name, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
   }
 
   /**
    * Read from a stream.
    */
-  private void read(StreamInput in) throws IOException {
-    featureFields = Arrays.asList(in.readStringArray());
-    responseField = in.readString();
+  public BaseAggregationBuilder(StreamInput in) throws IOException {
+    super(in, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
   }
 
   @Override
-  protected void doWriteTo(final StreamOutput out) throws IOException {
-    out.writeStringArray(featureFields.toArray(new String[featureFields.size()]));
-    out.writeString(responseField);
-    innerWriteTo(out);
+  protected final MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerBuild(
+      SearchContext context,
+      List<NamedValuesSourceConfigSpec<Numeric>> configs,
+      AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder)
+      throws IOException {
+    return innerInnerBuild(context, configs, multiValueMode, parent, subFactoriesBuilder);
   }
 
-  /**
-   * Write subclass's state to the stream if required.
-   *
-   * @param out the output stream
-   */
-  protected void innerWriteTo(StreamOutput out) throws IOException {
-    // NOP
-  }
-
-
-  @Override
-  protected final BaseAggregatorFactory<?> doBuild(SearchContext context,
-      AggregatorFactory<?> parent,
-      AggregatorFactories.Builder subFactoriesBuilder) throws IOException {
-    List<ValuesSourceConfig<Numeric>> featureConfigs = new ArrayList<>(featureFields.size());
-    for (String featureField : featureFields) {
-      featureConfigs.add(ValuesSourceConfig.resolve(context.getQueryShardContext(),
-          ValueType.NUMERIC, featureField, null, null, null, null));
-    }
-    ValuesSourceConfig<Numeric> responseConfig = ValuesSourceConfig
-        .resolve(context.getQueryShardContext(),
-            ValueType.NUMERIC, responseField, null, null, null, null);
-    BaseAggregatorFactory<?> factory = innerBuild(context,
-        featureConfigs,
-        responseConfig, parent,
-        subFactoriesBuilder);
-    return factory;
-  }
-
-
-  protected abstract BaseAggregatorFactory<?> innerBuild(SearchContext context,
-      List<ValuesSourceConfig<Numeric>> featureConfigs, ValuesSourceConfig<Numeric> responseConfig,
+  protected abstract MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerInnerBuild(
+      SearchContext context,
+      List<NamedValuesSourceConfigSpec<Numeric>> configs, MultiValueMode multiValueMode,
       AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder)
       throws IOException;
 
-
   @Override
-  public final XContentBuilder internalXContent(XContentBuilder builder, Params params)
+  public XContentBuilder doXContentBody(XContentBuilder builder, ToXContent.Params params)
       throws IOException {
-    builder.startObject();
-    if (featureFields != null) {
-      builder.field("feature_fields", featureFields);
-    }
-    if (responseField != null) {
-      builder.field("response_field", responseField);
-    }
-    doXContentBody(builder, params);
-    builder.endObject();
-    return builder;
-  }
-
-  /**
-   * Override in sub classes if required.
-   */
-  protected XContentBuilder doXContentBody(XContentBuilder builder, Params params)
-      throws IOException {
+    builder.field(MULTIVALUE_MODE_FIELD.getPreferredName(), multiValueMode);
     return builder;
   }
 
   @Override
-  protected final int doHashCode() {
-    return Objects.hash(featureFields, responseField, innerHashCode());
+  protected void innerWriteTo(StreamOutput out) {
+    // Do nothing, no extra state to write to stream
   }
 
-  /**
-   * Override in sub classes to include further attributes.
-   */
+  @Override
   protected int innerHashCode() {
     return 0;
   }
 
   @Override
-  protected boolean doEquals(final Object obj) {
-    BaseAggregationBuilder other = (BaseAggregationBuilder) obj;
-    if (!Objects.equals(featureFields, other.featureFields)) {
-      return false;
-    }
-    if (!Objects.equals(responseField, other.responseField)) {
-      return false;
-    }
-    return innerEquals(obj);
-  }
-
-  /**
-   * Override in sub classes to include further attributes.
-   */
   protected boolean innerEquals(Object obj) {
     return true;
   }
-
 }

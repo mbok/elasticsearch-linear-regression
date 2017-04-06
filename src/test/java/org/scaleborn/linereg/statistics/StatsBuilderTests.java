@@ -32,6 +32,7 @@ public class StatsBuilderTests extends ESTestCase {
     testStatsForModel(TestModels.SIMPLE_MODEL_1);
     testStatsForModel(TestModels.MULTI_FEATURES_2_MODEL_1);
     testStatsForModel(TestModels.MULTI_FEATURES_3_MODEL_1);
+    testStatsForModel(TestModels.MULTI_FEATURES_6_LONGLEY);
   }
 
   private void testStatsForModel(final TestModel testModel) {

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.elasticsearch.search.aggregations.support;
 
 /**
- * Created by mbok on 17.03.17.
+ * Created by mbok on 03.04.17.
  */
-public class DerivationEquationBuilder {
+public class NamedValuesSourceSpec<VS extends ValuesSource> {
 
-  public DerivationEquation buildDerivationEquation(
-      SlopeCoefficientsSampling slopeCoefficientsSampling) {
+  private String name;
+  private VS valuesSource;
 
-    return new DerivationEquation() {
-      @Override
-      public double[][] getCovarianceLowerTriangularMatrix() {
-        return slopeCoefficientsSampling.getCovarianceLowerTriangularMatrix();
-      }
+  public NamedValuesSourceSpec(final String name, final VS valuesSource) {
+    this.name = name;
+    this.valuesSource = valuesSource;
+  }
 
-      @Override
-      public double[] getConstraints() {
-        return slopeCoefficientsSampling.getFeaturesResponseCovariance();
-      }
-    };
+  public String getName() {
+    return name;
+  }
+
+  public VS getValuesSource() {
+    return valuesSource;
   }
 }

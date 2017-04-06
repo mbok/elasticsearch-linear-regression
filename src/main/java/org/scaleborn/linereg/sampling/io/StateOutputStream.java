@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package org.scaleborn.elasticsearch.linreg.aggregation.predict;
+package org.scaleborn.linereg.sampling.io;
+
+import java.io.IOException;
 
 /**
- * Prediction representation.
- * Created by mbok on 07.03.17.
+ * Created by mbok on 29.03.17.
  */
-public interface Prediction {
+public interface StateOutputStream {
 
-  /**
-   * @return the predicted value for the target variable
-   */
-  double getPrediction();
+  void writeInt(int c) throws IOException;
+
+  void writeLong(long c) throws IOException;
+
+  void writeDouble(double c) throws IOException;
+
+  void writeDoubleArray(double[] c) throws IOException;
+
+  void writeDoubleMatrix(double[][] c) throws IOException;
+
+  void writeBoolean(boolean c) throws IOException;
 }

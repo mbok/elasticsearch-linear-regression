@@ -16,10 +16,21 @@
 
 package org.scaleborn.linereg.sampling;
 
+import org.scaleborn.linereg.sampling.Sampling.CoefficientLinearTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.ResponseVarianceTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.SamplingContext;
+
 /**
  * Created by mbok on 26.03.17.
  */
-public interface ResponseVarianceTerm {
+public interface ModelSamplingFactory<C extends SamplingContext<C>> {
 
-  double getResponseVariance();
+  C createContext(int featuresCount);
+
+  ResponseVarianceTermSampling<?> createResponseVarianceTermSampling(C context);
+
+  CoefficientLinearTermSampling<?> createCoefficientLinearTermSampling(C context);
+
+  CoefficientSquareTermSampling<?> createCoefficientSquareTermSampling(C context);
 }

@@ -31,5 +31,5 @@ public interface DerivationEquationSolver {
    * further calculations.
    * @return the slope coefficients (excluding the intercept) for the best fit prediction equation
    */
-  double[] solveCoefficients(DerivationEquation eq);
+  SlopeCoefficients solveCoefficients(DerivationEquation eq);
 }

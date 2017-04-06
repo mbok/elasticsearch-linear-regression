@@ -24,6 +24,8 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.scaleborn.linereg.evaluation.DerivationEquation;
 import org.scaleborn.linereg.evaluation.DerivationEquationSolver;
+import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.evaluation.SlopeCoefficients.DefaultSlopeCoefficients;
 
 /**
  * Solves the coefficient derivation equation using math-commons library and the Cholesky
@@ -32,7 +34,7 @@ import org.scaleborn.linereg.evaluation.DerivationEquationSolver;
 public class CommonsMathSolver implements DerivationEquationSolver {
 
   @Override
-  public double[] solveCoefficients(final DerivationEquation eq) {
+  public SlopeCoefficients solveCoefficients(final DerivationEquation eq) {
     double[][] sourceTriangleMatrix = eq.getCovarianceLowerTriangularMatrix();
     // Copy matrix and enhance it to a full matrix as expected by CholeskyDecomposition
     // FIXME: Avoid copy job to speed-up the solving process e.g. by extending the CholeskyDecomposition constructor
@@ -53,7 +55,7 @@ public class CommonsMathSolver implements DerivationEquationSolver {
         new Array2DRowRealMatrix(matrix, false);
     DecompositionSolver solver = new CholeskyDecomposition(coefficients).getSolver();
     RealVector constants = new ArrayRealVector(eq.getConstraints(), true);
-    RealVector solution = solver.solve(constants);
-    return solution.toArray();
+    final RealVector solution = solver.solve(constants);
+    return new DefaultSlopeCoefficients(solution.toArray());
   }
 }

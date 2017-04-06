@@ -55,5 +55,13 @@ public interface Statistics {
     public double getMse() {
       return mse;
     }
+
+    @Override
+    public String toString() {
+      return "DefaultStatistics{" +
+          "rss=" + rss +
+          ", mse=" + mse +
+          '}';
+    }
   }
 }

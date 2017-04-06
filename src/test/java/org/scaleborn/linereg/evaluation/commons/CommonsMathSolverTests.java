@@ -34,7 +34,7 @@ public class CommonsMathSolverTests extends ESTestCase {
   public void testSimpleRegression() {
     TestModel model = TestModels.SIMPLE_MODEL_1;
     DerivationEquation equation = model.getEquation();
-    double[] coefficients = new CommonsMathSolver().solveCoefficients(equation);
+    double[] coefficients = new CommonsMathSolver().solveCoefficients(equation).getCoefficients();
     logger.info("Evaluated linreg coefficients: {}", coefficients);
     model.assertCoefficients(coefficients, 0.0000001);
   }
@@ -45,7 +45,8 @@ public class CommonsMathSolverTests extends ESTestCase {
   @Test
   public void testMultipleRegressionWith2Features() {
     TestModel testModel = TestModels.MULTI_FEATURES_2_MODEL_1;
-    double[] coefficients = new CommonsMathSolver().solveCoefficients(testModel.getEquation());
+    double[] coefficients = new CommonsMathSolver().solveCoefficients(testModel.getEquation())
+        .getCoefficients();
     logger.info("Evaluated linreg coefficients: {}", coefficients);
     testModel.assertCoefficients(coefficients, 0.0000001);
   }
@@ -57,8 +58,20 @@ public class CommonsMathSolverTests extends ESTestCase {
   public void testMultipleRegressionWith3Features() {
     TestModel testModel = TestModels.MULTI_FEATURES_3_MODEL_1;
     DerivationEquation equation = testModel.getEquation();
-    double[] coefficients = new CommonsMathSolver().solveCoefficients(equation);
+    double[] coefficients = new CommonsMathSolver().solveCoefficients(equation).getCoefficients();
     logger.info("Evaluated linreg coefficients: {}", coefficients);
+    testModel.assertCoefficients(coefficients, 0.0000001);
+  }
+
+  /**
+   * Tests coefficient evaluation with the reference Longley data set.
+   */
+  @Test
+  public void testMultipleRegressionWithLongleyDataSet() {
+    TestModel testModel = TestModels.MULTI_FEATURES_6_LONGLEY;
+    DerivationEquation equation = testModel.getEquation();
+    double[] coefficients = new CommonsMathSolver().solveCoefficients(equation).getCoefficients();
+    logger.info("Evaluated linreg coefficients for longley data set: {}", coefficients);
     testModel.assertCoefficients(coefficients, 0.0000001);
   }
 }

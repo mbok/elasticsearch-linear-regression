@@ -26,13 +26,13 @@ public class SamplingUtil {
    * Fills the given sampling data with observations from given matrix. The target value for each
    * observation is the last element in the row.
    *
-   * @param sampler sampler to fill with observations
+   * @param sampling sampling to fill with observations
    * @param observations observation as matrix. Each row represents an observation. The columns the
    * feature values expect of the last column which is the target variable value.
    */
-  public static void fillWithObservations(Sampler<?> sampler, double[][] observations) {
+  public static void fillWithObservations(Sampling<?> sampling, double[][] observations) {
     for (int i = 0; i < observations.length; i++) {
-      sampler.sample(observations[i], observations[i][observations[i].length - 1]);
+      sampling.sample(observations[i], observations[i][observations[i].length - 1]);
     }
   }
 }

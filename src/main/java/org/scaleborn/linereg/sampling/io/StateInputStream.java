@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.sampling;
+package org.scaleborn.linereg.sampling.io;
+
+import java.io.IOException;
 
 /**
- * Created by mbok on 26.03.17.
+ * Created by mbok on 29.03.17.
  */
-public interface CoefficientLinearTerm {
+public interface StateInputStream {
 
-  /**
-   * Features response covariance.
-   */
-  double[] getFeaturesResponseCovariance();
+  int readInt() throws IOException;
+
+  long readLong() throws IOException;
+
+  double readDouble() throws IOException;
+
+  double[] readDoubleArray() throws IOException;
+
+  double[][] readDoubleMatrix() throws IOException;
+
+  boolean readBoolean() throws IOException;
 }

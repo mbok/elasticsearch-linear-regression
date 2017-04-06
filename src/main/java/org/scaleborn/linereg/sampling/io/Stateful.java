@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.sampling;
+package org.scaleborn.linereg.sampling.io;
+
+import java.io.IOException;
 
 /**
- * Created by mbok on 26.03.17.
+ * Created by mbok on 29.03.17.
  */
-public interface CoefficientSquareTerm {
+public interface Stateful {
 
-  double[][] getCovarianceLowerTriangularMatrix();
+  void saveState(StateOutputStream destination) throws IOException;
 
+  void loadState(StateInputStream source) throws IOException;
 }

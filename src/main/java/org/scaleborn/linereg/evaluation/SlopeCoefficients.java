@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.sampling;
+package org.scaleborn.linereg.evaluation;
+
+import java.util.Arrays;
 
 /**
- * Created by mbok on 26.03.17.
+ * Created by mbok on 31.03.17.
  */
-public interface Sampler<Z extends Sampler<Z>> {
+public interface SlopeCoefficients {
 
-  void sample(double[] featureValues, double responseValue);
+  double[] getCoefficients();
 
-  void merge(Z fromSample);
+  class DefaultSlopeCoefficients implements SlopeCoefficients {
 
-  interface ResponseVarianceTermSampler<Z extends ResponseVarianceTermSampler<Z>> extends
-      Sampler<Z>,
-      ResponseVarianceTerm {
+    double[] coefficients;
 
-  }
+    public DefaultSlopeCoefficients(final double[] coefficients) {
+      this.coefficients = coefficients;
+    }
 
-  interface CoefficientLinearTermSampler<Z extends CoefficientLinearTermSampler<Z>> extends
-      Sampler<Z>,
-      CoefficientLinearTerm {
+    @Override
+    public double[] getCoefficients() {
+      return coefficients;
+    }
 
-  }
-
-  interface CoefficientSquareTermSampler<Z extends CoefficientSquareTermSampler<Z>> extends
-      Sampler<Z>,
-      CoefficientSquareTerm {
-
+    @Override
+    public String toString() {
+      return "DefaultSlopeCoefficients{" +
+          "coefficients=" + Arrays.toString(coefficients) +
+          '}';
+    }
   }
 }

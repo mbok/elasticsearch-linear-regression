@@ -14,36 +14,20 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.sampling;
+package org.scaleborn.elasticsearch.linreg.aggregation.stats;
+
+import java.util.Map;
+import org.elasticsearch.common.ParseField;
+import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseParser;
 
 /**
- * Created by mbok on 26.03.17.
+ * Created by mbok on 29.03.17.
  */
-public abstract class SamplingContext<C extends SamplingContext<C>> implements
-    Sampler<C> {
-
-  protected int featuresCount;
-  protected long count = 0;
-
-  public SamplingContext(final int featuresCount) {
-    this.featuresCount = featuresCount;
-  }
-
-  public int getFeaturesCount() {
-    return featuresCount;
-  }
-
-  public long getCount() {
-    return count;
-  }
+public class StatsParser extends BaseParser<StatsAggregationBuilder> {
 
   @Override
-  public void sample(final double[] featureValues, final double responseValue) {
-    count++;
-  }
-
-  @Override
-  public void merge(final C fromSample) {
-    count += fromSample.count;
+  protected StatsAggregationBuilder createInnerFactory(final String aggregationName,
+      final Map<ParseField, Object> otherOptions) {
+    return new StatsAggregationBuilder(aggregationName);
   }
 }

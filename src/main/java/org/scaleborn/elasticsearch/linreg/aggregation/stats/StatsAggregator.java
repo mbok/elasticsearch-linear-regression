@@ -19,56 +19,127 @@ package org.scaleborn.elasticsearch.linreg.aggregation.stats;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.LeafReaderContext;
+import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.common.util.ObjectArray;
+import org.elasticsearch.index.fielddata.NumericDoubleValues;
+import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.Aggregator;
 import org.elasticsearch.search.aggregations.InternalAggregation;
 import org.elasticsearch.search.aggregations.LeafBucketCollector;
-import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregator;
+import org.elasticsearch.search.aggregations.LeafBucketCollectorBase;
+import org.elasticsearch.search.aggregations.metrics.MetricsAggregator;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
+import org.elasticsearch.search.aggregations.support.MultiValuesSource.NumericMultiValuesSource;
+import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
+import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
 import org.elasticsearch.search.internal.SearchContext;
-import org.scaleborn.linereg.sampling.Sampler;
+import org.scaleborn.linereg.statistics.StatsSampling;
 
 /**
  * Created by mbok on 21.03.17.
  */
-public class StatsAggregator extends NumericMetricsAggregator.MultiValue {
+public class StatsAggregator extends MetricsAggregator {
 
-  protected ObjectArray<Sampler<?>> samplers;
+  private static final Logger LOGGER = Loggers.getLogger(StatsAggregator.class);
 
-  public StatsAggregator(final String name, final SearchContext context,
-      final Aggregator parent,
-      final List<PipelineAggregator> pipelineAggregators,
-      final Map<String, Object> metaData,
-      final ObjectArray<Sampler<?>> samples) throws IOException {
+  /**
+   * Multiple ValuesSource with field names
+   */
+  final NumericMultiValuesSource valuesSources;
+
+  protected ObjectArray<StatsSampling<?>> samplings;
+
+  public StatsAggregator(String name, List<NamedValuesSourceSpec<Numeric>> valuesSources,
+      SearchContext context,
+      Aggregator parent, MultiValueMode multiValueMode,
+      List<PipelineAggregator> pipelineAggregators,
+      Map<String, Object> metaData) throws IOException {
     super(name, context, parent, pipelineAggregators, metaData);
-    this.samplers = samplers;
+    if (valuesSources != null && !valuesSources.isEmpty()) {
+      this.valuesSources = new NumericMultiValuesSource(valuesSources, multiValueMode);
+      samplings = context.bigArrays().newObjectArray(1);
+    } else {
+      this.valuesSources = null;
+    }
   }
 
   @Override
-  public boolean hasMetric(final String name) {
-    return false;
+  public boolean needsScores() {
+    return (valuesSources == null) ? false : valuesSources.needsScores();
   }
 
   @Override
-  public double metric(final String name, final long owningBucketOrd) {
-    return 0;
+  public LeafBucketCollector getLeafCollector(LeafReaderContext ctx,
+      final LeafBucketCollector sub) throws IOException {
+    if (valuesSources == null) {
+      return LeafBucketCollector.NO_OP_COLLECTOR;
+    }
+    final BigArrays bigArrays = context.bigArrays();
+    final NumericDoubleValues[] values = new NumericDoubleValues[valuesSources.fieldNames().length];
+    for (int i = 0; i < values.length; ++i) {
+      values[i] = valuesSources.getField(i, ctx);
+    }
+
+    return new LeafBucketCollectorBase(sub, values) {
+      final String[] fieldNames = valuesSources.fieldNames();
+      final double[] fieldVals = new double[fieldNames.length];
+
+      @Override
+      public void collect(int doc, long bucket) throws IOException {
+        // get fields
+        if (includeDocument(doc) == true) {
+          samplings = bigArrays.grow(samplings, bucket + 1);
+          StatsSampling<?> sampling = samplings.get(bucket);
+          // add document fields to correlation stats
+          if (sampling == null) {
+            sampling = StatsAggregationBuilder.buildSampling(fieldNames.length - 1);
+            samplings.set(bucket, sampling);
+          }
+          LOGGER.info("Sampling for bucket={}, fields={}", bucket, fieldVals);
+          sampling.sample(fieldVals, fieldVals[fieldVals.length - 1]);
+        }
+      }
+
+      /**
+       * return a map of field names and data
+       */
+      private boolean includeDocument(int doc) {
+        // loop over fields
+        for (int i = 0; i < fieldVals.length; ++i) {
+          final NumericDoubleValues doubleValues = values[i];
+          final double value = doubleValues.get(doc);
+          // skip if value is missing
+          if (value == Double.NEGATIVE_INFINITY) {
+            return false;
+          }
+          fieldVals[i] = value;
+        }
+        return true;
+      }
+    };
   }
 
-  @Override
-  protected LeafBucketCollector getLeafCollector(final LeafReaderContext ctx,
-      final LeafBucketCollector sub)
-      throws IOException {
-    return null;
-  }
 
   @Override
-  public InternalAggregation buildAggregation(final long bucket) throws IOException {
-    return null;
+  public InternalAggregation buildAggregation(long bucket) {
+    if (valuesSources == null || bucket >= samplings.size()) {
+      return buildEmptyAggregation();
+    }
+    return new InternalStats(name, valuesSources.fieldNames().length - 1,
+        samplings.get(bucket), null,
+        pipelineAggregators(), metaData());
   }
 
   @Override
   public InternalAggregation buildEmptyAggregation() {
-    return null;
+    return new InternalStats(name, 0, null, null, pipelineAggregators(), metaData());
+  }
+
+  @Override
+  public void doClose() {
+    // Releasables.close(stats);
   }
 }

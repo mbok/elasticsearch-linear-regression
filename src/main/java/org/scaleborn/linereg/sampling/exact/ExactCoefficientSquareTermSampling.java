@@ -16,7 +16,10 @@
 
 package org.scaleborn.linereg.sampling.exact;
 
-import org.scaleborn.linereg.sampling.Sampler.CoefficientSquareTermSampler;
+import java.io.IOException;
+import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
+import org.scaleborn.linereg.sampling.io.StateInputStream;
+import org.scaleborn.linereg.sampling.io.StateOutputStream;
 
 /**
  * Samples square term data with covariance matrix solved exactly. Doing this that
@@ -24,8 +27,8 @@ import org.scaleborn.linereg.sampling.Sampler.CoefficientSquareTermSampler;
  * the count of variables and N the count of observations / documents.
  * Created by mbok on 27.03.17.
  */
-public class ExactCoefficientSquareTermSampler implements
-    CoefficientSquareTermSampler<ExactCoefficientSquareTermSampler> {
+public class ExactCoefficientSquareTermSampling implements
+    CoefficientSquareTermSampling<ExactCoefficientSquareTermSampling> {
 
   /**
    * TODO: Migrate to another algorithm to avoid sums of products, which can lead to numerical
@@ -34,7 +37,7 @@ public class ExactCoefficientSquareTermSampler implements
   private double[][] featuresProductSums;
   private ExactSamplingContext context;
 
-  public ExactCoefficientSquareTermSampler(ExactSamplingContext context) {
+  public ExactCoefficientSquareTermSampling(ExactSamplingContext context) {
     this.context = context;
     int featuresCount = context.getFeaturesCount();
     featuresProductSums = new double[featuresCount][];
@@ -76,12 +79,22 @@ public class ExactCoefficientSquareTermSampler implements
   }
 
   @Override
-  public void merge(final ExactCoefficientSquareTermSampler fromSample) {
+  public void merge(final ExactCoefficientSquareTermSampling fromSample) {
     int featuresCount = context.getFeaturesCount();
     for (int i = 0; i < featuresCount; i++) {
       for (int j = 0; j < featuresCount; j++) {
         featuresProductSums[i][j] += fromSample.featuresProductSums[i][j];
       }
     }
+  }
+
+  @Override
+  public void saveState(final StateOutputStream stream) throws IOException {
+    stream.writeDoubleMatrix(featuresProductSums);
+  }
+
+  @Override
+  public void loadState(final StateInputStream stream) throws IOException {
+    featuresProductSums = stream.readDoubleMatrix();
   }
 }

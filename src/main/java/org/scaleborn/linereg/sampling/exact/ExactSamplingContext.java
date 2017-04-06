@@ -16,12 +16,15 @@
 
 package org.scaleborn.linereg.sampling.exact;
 
-import org.scaleborn.linereg.sampling.SamplingContext;
+import java.io.IOException;
+import org.scaleborn.linereg.sampling.io.StateInputStream;
+import org.scaleborn.linereg.sampling.io.StateOutputStream;
+import org.scaleborn.linereg.sampling.support.BaseSamplingContext;
 
 /**
  * Created by mbok on 26.03.17.
  */
-public class ExactSamplingContext extends SamplingContext<ExactSamplingContext> {
+public class ExactSamplingContext extends BaseSamplingContext<ExactSamplingContext> {
 
   protected double[] featureSums;
   protected double responseSum = 0;
@@ -56,7 +59,7 @@ public class ExactSamplingContext extends SamplingContext<ExactSamplingContext> 
       featuresResponseProductSum[i] += from.featuresResponseProductSum[i];
     }
     responseSum += from.responseSum;
-    responseSquareSum += responseSquareSum;
+    responseSquareSum += from.responseSquareSum;
   }
 
   double[] getFeaturesMean() {
@@ -76,4 +79,19 @@ public class ExactSamplingContext extends SamplingContext<ExactSamplingContext> 
     return 0;
   }
 
+  @Override
+  public void saveState(final StateOutputStream stream) throws IOException {
+    stream.writeDouble(responseSum);
+    stream.writeDouble(responseSquareSum);
+    stream.writeDoubleArray(featureSums);
+    stream.writeDoubleArray(featuresResponseProductSum);
+  }
+
+  @Override
+  public void loadState(final StateInputStream stream) throws IOException {
+    responseSum = stream.readDouble();
+    responseSquareSum = stream.readDouble();
+    featureSums = stream.readDoubleArray();
+    featuresResponseProductSum = stream.readDoubleArray();
+  }
 }
