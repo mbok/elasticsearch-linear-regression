@@ -42,17 +42,17 @@ public class TestModels {
    */
   public static class TestModel {
 
-    private int buckets;
-    private int featureCount;
+    private final int buckets;
+    private final int featureCount;
     final double[][] observations;
-    private Statistics expectedStatistics;
-    private double[] expectedSlopeCoefficients;
+    private final Statistics expectedStatistics;
+    private final double[] expectedSlopeCoefficients;
     private StatsSampling statsSampling;
     private DerivationEquation equation;
 
     public TestModel(final int buckets, final int featureCount, final double[][] observations,
-        double[] expectedSlopeCoefficients,
-        Statistics statistics) {
+        final double[] expectedSlopeCoefficients,
+        final Statistics statistics) {
       this.buckets = buckets;
       this.featureCount = featureCount;
       this.observations = observations;
@@ -63,65 +63,66 @@ public class TestModels {
     }
 
     private StatsSampling<?> createSampling() {
-      ExactModelSamplingFactory f = new ExactModelSamplingFactory();
-      ExactSamplingContext samplingContext = f.createContext(featureCount);
-      return new StatsSamplingProxy<>(samplingContext, f
+      final ExactModelSamplingFactory f = new ExactModelSamplingFactory();
+      final ExactSamplingContext samplingContext = f.createContext(this.featureCount);
+      return new StatsSamplingProxy(samplingContext, f
           .createResponseVarianceTermSampling(samplingContext), f
           .createCoefficientLinearTermSampling(samplingContext), f
           .createCoefficientSquareTermSampling(samplingContext));
     }
 
-    @SuppressWarnings("unchecked")
     private void sample() {
-      List<StatsSampling<?>> bucketSamplings = new ArrayList<>(buckets);
-      for (int i = 0; i < buckets; i++) {
+      final List<StatsSampling<?>> bucketSamplings = new ArrayList<>(this.buckets);
+      for (int i = 0; i < this.buckets; i++) {
         bucketSamplings.add(createSampling());
       }
       int b = 0;
-      for (int i = 0; i < observations.length; i++) {
-        bucketSamplings.get(b).sample(observations[i], observations[i][observations[i].length - 1]);
+      for (int i = 0; i < this.observations.length; i++) {
+        bucketSamplings.get(b).sample(
+            this.observations[i], this.observations[i][this.observations[i].length - 1]);
         b++;
-        if (b >= buckets) {
+        if (b >= this.buckets) {
           b = 0;
         }
       }
-      statsSampling = createSampling();
-      for (int i = 0; i < buckets; i++) {
-        statsSampling.merge(bucketSamplings.get(i));
+      this.statsSampling = createSampling();
+      for (int i = 0; i < this.buckets; i++) {
+        this.statsSampling.merge(bucketSamplings.get(i));
       }
-      equation = new DerivationEquationBuilder()
-          .buildDerivationEquation(statsSampling);
+      this.equation = new DerivationEquationBuilder()
+          .buildDerivationEquation(this.statsSampling);
     }
 
     public double[] getExpectedSlopeCoefficients() {
-      return expectedSlopeCoefficients;
+      return this.expectedSlopeCoefficients;
     }
 
     public Statistics getExpectedStatistics() {
-      return expectedStatistics;
+      return this.expectedStatistics;
     }
 
     public DerivationEquation getEquation() {
-      return equation;
+      return this.equation;
     }
 
     public StatsModel evaluateModel() {
-      SlopeCoefficients coefficients = new CommonsMathSolver().solveCoefficients(equation);
-      return new StatsModel(statsSampling, coefficients);
+      final SlopeCoefficients coefficients = new CommonsMathSolver().solveCoefficients(
+          this.equation);
+      return new StatsModel(this.statsSampling, coefficients);
     }
 
-    public void assertCoefficients(double[] givenCoefficients, double delta) {
+    public void assertCoefficients(final double[] givenCoefficients, final double delta) {
       assertEquals("Count of evaluated coefficients not equal",
-          expectedSlopeCoefficients.length, givenCoefficients.length);
-      for (int i = 0; i < expectedSlopeCoefficients.length; i++) {
+          this.expectedSlopeCoefficients.length, givenCoefficients.length);
+      for (int i = 0; i < this.expectedSlopeCoefficients.length; i++) {
         assertEquals("Evaluated coefficient " + i + " not eqal",
-            expectedSlopeCoefficients[i], givenCoefficients[i], delta);
+            this.expectedSlopeCoefficients[i], givenCoefficients[i], delta);
       }
     }
 
     public void assertStatistics(final Statistics statistics) {
-      assertEquals("RSS not equal", expectedStatistics.getRss(), statistics.getRss(), 0.0001d);
-      assertEquals("MSE not equal", expectedStatistics.getMse(), statistics.getMse(), 0.0001d);
+      assertEquals("RSS not equal", this.expectedStatistics.getRss(), statistics.getRss(), 0.0001d);
+      assertEquals("MSE not equal", this.expectedStatistics.getMse(), statistics.getMse(), 0.0001d);
     }
   }
 
