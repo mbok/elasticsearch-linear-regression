@@ -100,6 +100,8 @@ public class StatsAggregator extends MetricsAggregator {
           }
           LOGGER.info("Sampling for bucket={}, fields={}", bucket, fieldVals);
           sampling.sample(fieldVals, fieldVals[fieldVals.length - 1]);
+        } else {
+          LOGGER.warn("Skipped bucket={}, fields={}", bucket, fieldVals);
         }
       }
 

@@ -71,5 +71,12 @@ public interface StatsSampling<Z extends StatsSampling<Z>> extends SlopeCoeffici
     public double getResponseVariance() {
       return responseVarianceTermSampling.getResponseVariance();
     }
+
+    @Override
+    public String toString() {
+      return "StatsSamplingProxy{" +
+          "responseVarianceTermSampling=" + responseVarianceTermSampling +
+          "} " + super.toString();
+    }
   }
 }

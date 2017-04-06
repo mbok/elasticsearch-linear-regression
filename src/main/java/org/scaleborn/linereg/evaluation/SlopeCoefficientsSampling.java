@@ -48,51 +48,60 @@ public interface SlopeCoefficientsSampling<Z extends SlopeCoefficientsSampling<Z
 
     @Override
     public void saveState(final StateOutputStream destination) throws IOException {
-      samplingContext.saveState(destination);
-      coefficientLinearTermSampling.saveState(destination);
-      coefficientSquareTermSampling.saveState(destination);
+      this.samplingContext.saveState(destination);
+      this.coefficientLinearTermSampling.saveState(destination);
+      this.coefficientSquareTermSampling.saveState(destination);
     }
 
     @Override
     public void sample(final double[] featureValues, final double responseValue) {
-      samplingContext.sample(featureValues, responseValue);
-      coefficientLinearTermSampling.sample(featureValues, responseValue);
-      coefficientSquareTermSampling.sample(featureValues, responseValue);
+      this.samplingContext.sample(featureValues, responseValue);
+      this.coefficientLinearTermSampling.sample(featureValues, responseValue);
+      this.coefficientSquareTermSampling.sample(featureValues, responseValue);
     }
 
     @Override
     public void loadState(final StateInputStream source) throws IOException {
-      samplingContext.loadState(source);
-      coefficientLinearTermSampling.loadState(source);
-      coefficientSquareTermSampling.loadState(source);
+      this.samplingContext.loadState(source);
+      this.coefficientLinearTermSampling.loadState(source);
+      this.coefficientSquareTermSampling.loadState(source);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void merge(final SlopeCoefficientsSamplingProxy fromSample) {
-      samplingContext.merge(fromSample.samplingContext);
-      coefficientLinearTermSampling.merge(fromSample.coefficientLinearTermSampling);
-      coefficientSquareTermSampling.merge(fromSample.coefficientSquareTermSampling);
+      this.samplingContext.merge(fromSample.samplingContext);
+      this.coefficientLinearTermSampling.merge(fromSample.coefficientLinearTermSampling);
+      this.coefficientSquareTermSampling.merge(fromSample.coefficientSquareTermSampling);
     }
 
     @Override
     public double[] getFeaturesResponseCovariance() {
-      return coefficientLinearTermSampling.getFeaturesResponseCovariance();
+      return this.coefficientLinearTermSampling.getFeaturesResponseCovariance();
     }
 
     @Override
     public double[][] getCovarianceLowerTriangularMatrix() {
-      return coefficientSquareTermSampling.getCovarianceLowerTriangularMatrix();
+      return this.coefficientSquareTermSampling.getCovarianceLowerTriangularMatrix();
     }
 
     @Override
     public long getCount() {
-      return samplingContext.getCount();
+      return this.samplingContext.getCount();
     }
 
     @Override
     public int getFeaturesCount() {
-      return samplingContext.getFeaturesCount();
+      return this.samplingContext.getFeaturesCount();
+    }
+
+    @Override
+    public String toString() {
+      return "SlopeCoefficientsSamplingProxy{" +
+          "samplingContext=" + this.samplingContext +
+          ", coefficientLinearTermSampling=" + this.coefficientLinearTermSampling +
+          ", coefficientSquareTermSampling=" + this.coefficientSquareTermSampling +
+          '}';
     }
   }
 

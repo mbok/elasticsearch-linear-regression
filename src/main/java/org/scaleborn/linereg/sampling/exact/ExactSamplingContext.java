@@ -17,6 +17,7 @@
 package org.scaleborn.linereg.sampling.exact;
 
 import java.io.IOException;
+import java.util.Arrays;
 import org.scaleborn.linereg.sampling.io.StateInputStream;
 import org.scaleborn.linereg.sampling.io.StateOutputStream;
 import org.scaleborn.linereg.sampling.support.BaseSamplingContext;
@@ -35,8 +36,8 @@ public class ExactSamplingContext extends BaseSamplingContext<ExactSamplingConte
 
   public ExactSamplingContext(final int featuresCount) {
     super(featuresCount);
-    featureSums = new double[featuresCount];
-    featuresResponseProductSum = new double[featuresCount];
+    this.featureSums = new double[featuresCount];
+    this.featuresResponseProductSum = new double[featuresCount];
   }
 
   @Override
@@ -44,29 +45,29 @@ public class ExactSamplingContext extends BaseSamplingContext<ExactSamplingConte
     super.sample(featureValues, targetValue);
     for (int i = 0; i < featuresCount; i++) {
       double v = featureValues[i];
-      featureSums[i] += v;
-      featuresResponseProductSum[i] += v * targetValue;
+      this.featureSums[i] += v;
+      this.featuresResponseProductSum[i] += v * targetValue;
     }
-    responseSum += targetValue;
-    responseSquareSum += targetValue * targetValue;
+    this.responseSum += targetValue;
+    this.responseSquareSum += targetValue * targetValue;
   }
 
   @Override
   public void merge(ExactSamplingContext from) {
     super.merge(from);
     for (int i = 0; i < featuresCount; i++) {
-      featureSums[i] += from.featureSums[i];
-      featuresResponseProductSum[i] += from.featuresResponseProductSum[i];
+      this.featureSums[i] += from.featureSums[i];
+      this.featuresResponseProductSum[i] += from.featuresResponseProductSum[i];
     }
-    responseSum += from.responseSum;
-    responseSquareSum += from.responseSquareSum;
+    this.responseSum += from.responseSum;
+    this.responseSquareSum += from.responseSquareSum;
   }
 
   double[] getFeaturesMean() {
     double[] avgs = new double[featuresCount];
     if (count > 0) {
       for (int i = 0; i < featuresCount; i++) {
-        avgs[i] = featureSums[i] / count;
+        avgs[i] = this.featureSums[i] / count;
       }
     }
     return avgs;
@@ -74,24 +75,36 @@ public class ExactSamplingContext extends BaseSamplingContext<ExactSamplingConte
 
   double getResponseMean() {
     if (count > 0) {
-      return responseSum / count;
+      return this.responseSum / count;
     }
     return 0;
   }
 
   @Override
   public void saveState(final StateOutputStream stream) throws IOException {
-    stream.writeDouble(responseSum);
-    stream.writeDouble(responseSquareSum);
-    stream.writeDoubleArray(featureSums);
-    stream.writeDoubleArray(featuresResponseProductSum);
+    super.saveState(stream);
+    stream.writeDouble(this.responseSum);
+    stream.writeDouble(this.responseSquareSum);
+    stream.writeDoubleArray(this.featureSums);
+    stream.writeDoubleArray(this.featuresResponseProductSum);
   }
 
   @Override
   public void loadState(final StateInputStream stream) throws IOException {
-    responseSum = stream.readDouble();
-    responseSquareSum = stream.readDouble();
-    featureSums = stream.readDoubleArray();
-    featuresResponseProductSum = stream.readDoubleArray();
+    super.loadState(stream);
+    this.responseSum = stream.readDouble();
+    this.responseSquareSum = stream.readDouble();
+    this.featureSums = stream.readDoubleArray();
+    this.featuresResponseProductSum = stream.readDoubleArray();
+  }
+
+  @Override
+  public String toString() {
+    return "ExactSamplingContext{" +
+        "featureSums=" + Arrays.toString(this.featureSums) +
+        ", responseSum=" + this.responseSum +
+        ", featuresResponseProductSum=" + Arrays.toString(this.featuresResponseProductSum) +
+        ", responseSquareSum=" + this.responseSquareSum +
+        "} " + super.toString();
   }
 }

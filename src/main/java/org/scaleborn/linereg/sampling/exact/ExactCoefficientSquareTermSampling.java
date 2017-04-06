@@ -17,6 +17,7 @@
 package org.scaleborn.linereg.sampling.exact;
 
 import java.io.IOException;
+import java.util.Arrays;
 import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
 import org.scaleborn.linereg.sampling.io.StateInputStream;
 import org.scaleborn.linereg.sampling.io.StateOutputStream;
@@ -40,19 +41,19 @@ public class ExactCoefficientSquareTermSampling implements
   public ExactCoefficientSquareTermSampling(ExactSamplingContext context) {
     this.context = context;
     int featuresCount = context.getFeaturesCount();
-    featuresProductSums = new double[featuresCount][];
+    this.featuresProductSums = new double[featuresCount][];
     for (int i = 0; i < featuresCount; i++) {
-      featuresProductSums[i] = new double[featuresCount];
+      this.featuresProductSums[i] = new double[featuresCount];
     }
   }
 
   @Override
   public double[][] getCovarianceLowerTriangularMatrix() {
-    int featuresCount = context.getFeaturesCount();
-    long count = context.getCount();
+    int featuresCount = this.context.getFeaturesCount();
+    long count = this.context.getCount();
     double[][] covMatrix = new double[featuresCount][];
-    double[] averages = context.getFeaturesMean();
-    double[] featureSums = context.featureSums;
+    double[] averages = this.context.getFeaturesMean();
+    double[] featureSums = this.context.featureSums;
     for (int i = 0; i < featuresCount; i++) {
       double avgI = averages[i];
       covMatrix[i] = new double[featuresCount];
@@ -60,8 +61,9 @@ public class ExactCoefficientSquareTermSampling implements
       // build only the lower triangle
       for (int j = 0; j <= i; j++) {
         double avgJ = averages[j];
-        covMatrix[i][j] = featuresProductSums[i][j] - avgI * featureSums[j] - avgJ * featureSums[i]
-            + count * avgI * avgJ;
+        covMatrix[i][j] =
+            this.featuresProductSums[i][j] - avgI * featureSums[j] - avgJ * featureSums[i]
+                + count * avgI * avgJ;
       }
     }
     return covMatrix;
@@ -69,32 +71,39 @@ public class ExactCoefficientSquareTermSampling implements
 
   @Override
   public void sample(final double[] featureValues, final double responseValue) {
-    int featuresCount = context.getFeaturesCount();
+    int featuresCount = this.context.getFeaturesCount();
     for (int i = 0; i < featuresCount; i++) {
       double vi = featureValues[i];
       for (int j = 0; j < featuresCount; j++) {
-        featuresProductSums[i][j] += vi * featureValues[j];
+        this.featuresProductSums[i][j] += vi * featureValues[j];
       }
     }
   }
 
   @Override
   public void merge(final ExactCoefficientSquareTermSampling fromSample) {
-    int featuresCount = context.getFeaturesCount();
+    int featuresCount = this.context.getFeaturesCount();
     for (int i = 0; i < featuresCount; i++) {
       for (int j = 0; j < featuresCount; j++) {
-        featuresProductSums[i][j] += fromSample.featuresProductSums[i][j];
+        this.featuresProductSums[i][j] += fromSample.featuresProductSums[i][j];
       }
     }
   }
 
   @Override
   public void saveState(final StateOutputStream stream) throws IOException {
-    stream.writeDoubleMatrix(featuresProductSums);
+    stream.writeDoubleMatrix(this.featuresProductSums);
   }
 
   @Override
   public void loadState(final StateInputStream stream) throws IOException {
-    featuresProductSums = stream.readDoubleMatrix();
+    this.featuresProductSums = stream.readDoubleMatrix();
+  }
+
+  @Override
+  public String toString() {
+    return "ExactCoefficientSquareTermSampling{" +
+        "featuresProductSums=" + Arrays.deepToString(this.featuresProductSums) +
+        '}';
   }
 }
