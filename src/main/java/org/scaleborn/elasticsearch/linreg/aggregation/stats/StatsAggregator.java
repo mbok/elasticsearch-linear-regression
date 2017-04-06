@@ -52,15 +52,16 @@ public class StatsAggregator extends MetricsAggregator {
 
   protected ObjectArray<StatsSampling<?>> samplings;
 
-  public StatsAggregator(String name, List<NamedValuesSourceSpec<Numeric>> valuesSources,
-      SearchContext context,
-      Aggregator parent, MultiValueMode multiValueMode,
-      List<PipelineAggregator> pipelineAggregators,
-      Map<String, Object> metaData) throws IOException {
+  public StatsAggregator(final String name,
+      final List<NamedValuesSourceSpec<Numeric>> valuesSources,
+      final SearchContext context,
+      final Aggregator parent, final MultiValueMode multiValueMode,
+      final List<PipelineAggregator> pipelineAggregators,
+      final Map<String, Object> metaData) throws IOException {
     super(name, context, parent, pipelineAggregators, metaData);
     if (valuesSources != null && !valuesSources.isEmpty()) {
       this.valuesSources = new NumericMultiValuesSource(valuesSources, multiValueMode);
-      samplings = context.bigArrays().newObjectArray(1);
+      this.samplings = context.bigArrays().newObjectArray(1);
     } else {
       this.valuesSources = null;
     }
@@ -68,56 +69,58 @@ public class StatsAggregator extends MetricsAggregator {
 
   @Override
   public boolean needsScores() {
-    return (valuesSources == null) ? false : valuesSources.needsScores();
+    return this.valuesSources == null || this.valuesSources.needsScores();
   }
 
   @Override
-  public LeafBucketCollector getLeafCollector(LeafReaderContext ctx,
+  public LeafBucketCollector getLeafCollector(final LeafReaderContext ctx,
       final LeafBucketCollector sub) throws IOException {
-    if (valuesSources == null) {
+    if (this.valuesSources == null) {
       return LeafBucketCollector.NO_OP_COLLECTOR;
     }
-    final BigArrays bigArrays = context.bigArrays();
-    final NumericDoubleValues[] values = new NumericDoubleValues[valuesSources.fieldNames().length];
+    final BigArrays bigArrays = this.context.bigArrays();
+    final NumericDoubleValues[] values = new NumericDoubleValues[this.valuesSources
+        .fieldNames().length];
     for (int i = 0; i < values.length; ++i) {
-      values[i] = valuesSources.getField(i, ctx);
+      values[i] = this.valuesSources.getField(i, ctx);
     }
 
     return new LeafBucketCollectorBase(sub, values) {
-      final String[] fieldNames = valuesSources.fieldNames();
-      final double[] fieldVals = new double[fieldNames.length];
+      final String[] fieldNames = StatsAggregator.this.valuesSources.fieldNames();
+      final double[] fieldVals = new double[this.fieldNames.length];
 
       @Override
-      public void collect(int doc, long bucket) throws IOException {
+      public void collect(final int doc, final long bucket) throws IOException {
         // get fields
         if (includeDocument(doc) == true) {
-          samplings = bigArrays.grow(samplings, bucket + 1);
-          StatsSampling<?> sampling = samplings.get(bucket);
+          StatsAggregator.this.samplings = bigArrays
+              .grow(StatsAggregator.this.samplings, bucket + 1);
+          StatsSampling<?> sampling = StatsAggregator.this.samplings.get(bucket);
           // add document fields to correlation stats
           if (sampling == null) {
-            sampling = StatsAggregationBuilder.buildSampling(fieldNames.length - 1);
-            samplings.set(bucket, sampling);
+            sampling = StatsAggregationBuilder.buildSampling(this.fieldNames.length - 1);
+            StatsAggregator.this.samplings.set(bucket, sampling);
           }
-          LOGGER.info("Sampling for bucket={}, fields={}", bucket, fieldVals);
-          sampling.sample(fieldVals, fieldVals[fieldVals.length - 1]);
+          LOGGER.info("Sampling for bucket={}, fields={}", bucket, this.fieldVals);
+          sampling.sample(this.fieldVals, this.fieldVals[this.fieldVals.length - 1]);
         } else {
-          LOGGER.warn("Skipped bucket={}, fields={}", bucket, fieldVals);
+          LOGGER.warn("Skipped bucket={}, fields={}", bucket, this.fieldVals);
         }
       }
 
       /**
        * return a map of field names and data
        */
-      private boolean includeDocument(int doc) {
+      private boolean includeDocument(final int doc) {
         // loop over fields
-        for (int i = 0; i < fieldVals.length; ++i) {
+        for (int i = 0; i < this.fieldVals.length; ++i) {
           final NumericDoubleValues doubleValues = values[i];
           final double value = doubleValues.get(doc);
           // skip if value is missing
           if (value == Double.NEGATIVE_INFINITY) {
             return false;
           }
-          fieldVals[i] = value;
+          this.fieldVals[i] = value;
         }
         return true;
       }
@@ -126,18 +129,18 @@ public class StatsAggregator extends MetricsAggregator {
 
 
   @Override
-  public InternalAggregation buildAggregation(long bucket) {
-    if (valuesSources == null || bucket >= samplings.size()) {
+  public InternalAggregation buildAggregation(final long bucket) {
+    if (this.valuesSources == null || bucket >= this.samplings.size()) {
       return buildEmptyAggregation();
     }
-    return new InternalStats(name, valuesSources.fieldNames().length - 1,
-        samplings.get(bucket), null,
+    return new InternalStats(this.name, this.valuesSources.fieldNames().length - 1,
+        this.samplings.get(bucket), null,
         pipelineAggregators(), metaData());
   }
 
   @Override
   public InternalAggregation buildEmptyAggregation() {
-    return new InternalStats(name, 0, null, null, pipelineAggregators(), metaData());
+    return new InternalStats(this.name, 0, null, null, pipelineAggregators(), metaData());
   }
 
   @Override

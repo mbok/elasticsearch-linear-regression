@@ -38,24 +38,23 @@ public abstract class BaseParser<B extends BaseAggregationBuilder<B>> extends
   }
 
   @Override
-  protected boolean token(String aggregationName, String currentFieldName,
-      XContentParser.Token token, XContentParser parser,
-      Map<ParseField, Object> otherOptions) throws IOException {
-    if (MULTIVALUE_MODE_FIELD.match(currentFieldName)) {
-      if (token == XContentParser.Token.VALUE_STRING) {
-        otherOptions.put(MULTIVALUE_MODE_FIELD, parser.text());
-        return true;
-      }
+  protected boolean token(final String aggregationName, final String currentFieldName,
+      final XContentParser.Token token, final XContentParser parser,
+      final Map<ParseField, Object> otherOptions) throws IOException {
+    if (MULTIVALUE_MODE_FIELD.match(currentFieldName)
+        && token == XContentParser.Token.VALUE_STRING) {
+      otherOptions.put(MULTIVALUE_MODE_FIELD, parser.text());
+      return true;
     }
     return false;
   }
 
   @Override
-  protected B createFactory(String aggregationName,
-      ValuesSourceType valuesSourceType,
-      ValueType targetValueType, Map<ParseField, Object> otherOptions) {
-    B builder = createInnerFactory(aggregationName, otherOptions);
-    String mode = (String) otherOptions.get(MULTIVALUE_MODE_FIELD);
+  protected B createFactory(final String aggregationName,
+      final ValuesSourceType valuesSourceType,
+      final ValueType targetValueType, final Map<ParseField, Object> otherOptions) {
+    final B builder = createInnerFactory(aggregationName, otherOptions);
+    final String mode = (String) otherOptions.get(MULTIVALUE_MODE_FIELD);
     if (mode != null) {
       builder.multiValueMode(MultiValueMode.fromString(mode));
     }
