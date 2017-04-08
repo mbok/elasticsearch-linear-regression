@@ -36,7 +36,6 @@ import org.elasticsearch.search.aggregations.support.MultiValuesSource.NumericMu
 import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
 import org.elasticsearch.search.internal.SearchContext;
-import org.scaleborn.linereg.statistics.StatsSampling;
 
 /**
  * Created by mbok on 21.03.17.
@@ -50,7 +49,7 @@ public class StatsAggregator extends MetricsAggregator {
    */
   final NumericMultiValuesSource valuesSources;
 
-  protected ObjectArray<StatsSampling<?>> samplings;
+  protected ObjectArray<StatsAggregationSampling> samplings;
 
   public StatsAggregator(final String name,
       final List<NamedValuesSourceSpec<Numeric>> valuesSources,
@@ -95,7 +94,7 @@ public class StatsAggregator extends MetricsAggregator {
         if (includeDocument(doc) == true) {
           StatsAggregator.this.samplings = bigArrays
               .grow(StatsAggregator.this.samplings, bucket + 1);
-          StatsSampling<?> sampling = StatsAggregator.this.samplings.get(bucket);
+          StatsAggregationSampling sampling = StatsAggregator.this.samplings.get(bucket);
           // add document fields to correlation stats
           if (sampling == null) {
             sampling = StatsAggregationBuilder.buildSampling(this.fieldNames.length - 1);

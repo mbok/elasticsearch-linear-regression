@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.statistics;
+package org.scaleborn.linereg.calculation.statistics;
 
 import org.scaleborn.linereg.evaluation.SlopeCoefficients;
 
@@ -26,8 +26,8 @@ import org.scaleborn.linereg.evaluation.SlopeCoefficients;
  */
 public class StatsModel {
 
-  private StatsSampling<?> statsSampling;
-  private SlopeCoefficients slopeCoefficients;
+  private final StatsSampling<?> statsSampling;
+  private final SlopeCoefficients slopeCoefficients;
 
   public StatsModel(final StatsSampling<?> statsSampling,
       final SlopeCoefficients slopeCoefficients) {
@@ -36,19 +36,19 @@ public class StatsModel {
   }
 
   public StatsSampling<?> getStatsSampling() {
-    return statsSampling;
+    return this.statsSampling;
   }
 
 
   public SlopeCoefficients getSlopeCoefficients() {
-    return slopeCoefficients;
+    return this.slopeCoefficients;
   }
 
   @Override
   public String toString() {
     return "StatsModel{" +
-        "statsSampling=" + statsSampling +
-        ", slopeCoefficients=" + slopeCoefficients +
+        "statsSampling=" + this.statsSampling +
+        ", slopeCoefficients=" + this.slopeCoefficients +
         '}';
   }
 }

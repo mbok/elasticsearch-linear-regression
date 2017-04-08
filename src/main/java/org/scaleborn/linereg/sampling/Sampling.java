@@ -53,6 +53,13 @@ public interface Sampling<Z extends Sampling<Z>> extends Stateful {
       Sampling<Z> {
 
     double[][] getCovarianceLowerTriangularMatrix();
+  }
 
+  interface InterceptSampling<Z extends InterceptSampling<Z>> extends
+      Sampling<Z> {
+
+    double[] getFeaturesMean();
+
+    double getResponseMean();
   }
 }

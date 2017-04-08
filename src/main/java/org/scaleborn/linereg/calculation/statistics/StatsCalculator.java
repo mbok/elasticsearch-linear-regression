@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.statistics;
+package org.scaleborn.linereg.calculation.statistics;
 
 /**
  * Created by mbok on 19.03.17.
  */
-public class StatsBuilder {
+public class StatsCalculator {
 
-  public Statistics buildStats(final StatsModel model) {
-    int featuresCount = model.getStatsSampling().getFeaturesCount();
-    double[] featuresResponseCovariance = model.getStatsSampling()
+  public Statistics calculate(final StatsModel model) {
+    final int featuresCount = model.getStatsSampling().getFeaturesCount();
+    final double[] featuresResponseCovariance = model.getStatsSampling()
         .getFeaturesResponseCovariance();
-    double[][] covarianceLowerTriangularMatrix = model.getStatsSampling()
+    final double[][] covarianceLowerTriangularMatrix = model.getStatsSampling()
         .getCovarianceLowerTriangularMatrix();
-    double[] slopeCoefficients = model.getSlopeCoefficients().getCoefficients();
+    final double[] slopeCoefficients = model.getSlopeCoefficients().getCoefficients();
 
     double squaredError = model.getStatsSampling().getResponseVariance();
 
     for (int i = 0; i < featuresCount; i++) {
-      double c = slopeCoefficients[i];
-      double c2 = c * c;
+      final double c = slopeCoefficients[i];
+      final double c2 = c * c;
       // Minus double of feature response coefficient
       squaredError -= 2 * featuresResponseCovariance[i] * c;
 

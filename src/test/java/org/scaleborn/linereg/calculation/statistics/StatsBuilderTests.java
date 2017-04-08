@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.statistics;
+package org.scaleborn.linereg.calculation.statistics;
 
 import org.elasticsearch.test.ESTestCase;
 import org.junit.Test;
@@ -22,7 +22,7 @@ import org.scaleborn.linereg.TestModels;
 import org.scaleborn.linereg.TestModels.TestModel;
 
 /**
- * Tests for {@link StatsBuilder}.
+ * Tests for {@link StatsCalculator}.
  * Created by mbok on 19.03.17.
  */
 public class StatsBuilderTests extends ESTestCase {
@@ -36,8 +36,8 @@ public class StatsBuilderTests extends ESTestCase {
   }
 
   private void testStatsForModel(final TestModel testModel) {
-    StatsModel linearModel = testModel.evaluateModel();
-    Statistics statistics = new StatsBuilder().buildStats(linearModel);
+    final StatsModel linearModel = testModel.evaluateModel();
+    final Statistics statistics = new StatsCalculator().calculate(linearModel);
     testModel.assertStatistics(statistics);
   }
 }

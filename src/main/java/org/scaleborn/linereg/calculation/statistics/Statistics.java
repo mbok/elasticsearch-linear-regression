@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.statistics;
+package org.scaleborn.linereg.calculation.statistics;
 
 /**
  * Created by mbok on 19.03.17.
@@ -38,8 +38,8 @@ public interface Statistics {
    */
   public class DefaultStatistics implements Statistics {
 
-    private double rss;
-    private double mse;
+    private final double rss;
+    private final double mse;
 
     public DefaultStatistics(final double rss, final double mse) {
       this.rss = rss;
@@ -48,19 +48,19 @@ public interface Statistics {
 
     @Override
     public double getRss() {
-      return rss;
+      return this.rss;
     }
 
     @Override
     public double getMse() {
-      return mse;
+      return this.mse;
     }
 
     @Override
     public String toString() {
       return "DefaultStatistics{" +
-          "rss=" + rss +
-          ", mse=" + mse +
+          "rss=" + this.rss +
+          ", mse=" + this.mse +
           '}';
     }
   }

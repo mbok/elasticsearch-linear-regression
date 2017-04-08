@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.statistics;
+package org.scaleborn.linereg.calculation.statistics;
 
 import java.io.IOException;
 import org.scaleborn.linereg.evaluation.SlopeCoefficientsSampling;
@@ -32,7 +32,7 @@ public interface StatsSampling<Z extends StatsSampling<Z>> extends SlopeCoeffici
       SlopeCoefficientsSamplingProxy<Y> implements
       StatsSampling<Y> {
 
-    private ResponseVarianceTermSampling responseVarianceTermSampling;
+    private final ResponseVarianceTermSampling responseVarianceTermSampling;
 
     public StatsSamplingProxy(
         final SamplingContext<?> samplingContext,
@@ -46,36 +46,38 @@ public interface StatsSampling<Z extends StatsSampling<Z>> extends SlopeCoeffici
     @Override
     public void saveState(final StateOutputStream destination) throws IOException {
       super.saveState(destination);
-      responseVarianceTermSampling.saveState(destination);
+      this.responseVarianceTermSampling.saveState(destination);
     }
 
     @Override
     public void sample(final double[] featureValues, final double responseValue) {
       super.sample(featureValues, responseValue);
-      responseVarianceTermSampling.sample(featureValues, responseValue);
+      this.responseVarianceTermSampling.sample(featureValues, responseValue);
     }
 
     @Override
     public void loadState(final StateInputStream source) throws IOException {
       super.loadState(source);
-      responseVarianceTermSampling.loadState(source);
+      this.responseVarianceTermSampling.loadState(source);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void merge(final StatsSamplingProxy fromSample) {
+    public void merge(final Y fromSample) {
       super.merge(fromSample);
-      responseVarianceTermSampling.merge(fromSample.responseVarianceTermSampling);
+      this.responseVarianceTermSampling
+          .merge(((StatsSamplingProxy<Y>) fromSample).responseVarianceTermSampling);
     }
 
     @Override
     public double getResponseVariance() {
-      return responseVarianceTermSampling.getResponseVariance();
+      return this.responseVarianceTermSampling.getResponseVariance();
     }
 
     @Override
     public String toString() {
       return "StatsSamplingProxy{" +
-          "responseVarianceTermSampling=" + responseVarianceTermSampling +
+          "responseVarianceTermSampling=" + this.responseVarianceTermSampling +
           "} " + super.toString();
     }
   }

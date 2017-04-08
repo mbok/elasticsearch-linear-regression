@@ -20,17 +20,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.scaleborn.linereg.calculation.statistics.Statistics;
+import org.scaleborn.linereg.calculation.statistics.Statistics.DefaultStatistics;
+import org.scaleborn.linereg.calculation.statistics.StatsModel;
+import org.scaleborn.linereg.calculation.statistics.StatsSampling;
+import org.scaleborn.linereg.calculation.statistics.StatsSampling.StatsSamplingProxy;
 import org.scaleborn.linereg.evaluation.DerivationEquation;
 import org.scaleborn.linereg.evaluation.DerivationEquationBuilder;
 import org.scaleborn.linereg.evaluation.SlopeCoefficients;
 import org.scaleborn.linereg.evaluation.commons.CommonsMathSolver;
 import org.scaleborn.linereg.sampling.exact.ExactModelSamplingFactory;
 import org.scaleborn.linereg.sampling.exact.ExactSamplingContext;
-import org.scaleborn.linereg.statistics.Statistics;
-import org.scaleborn.linereg.statistics.Statistics.DefaultStatistics;
-import org.scaleborn.linereg.statistics.StatsModel;
-import org.scaleborn.linereg.statistics.StatsSampling;
-import org.scaleborn.linereg.statistics.StatsSampling.StatsSamplingProxy;
 
 /**
  * Created by mbok on 19.03.17.

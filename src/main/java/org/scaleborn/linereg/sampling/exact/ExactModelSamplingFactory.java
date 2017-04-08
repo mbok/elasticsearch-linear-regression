@@ -16,9 +16,11 @@
 
 package org.scaleborn.linereg.sampling.exact;
 
+import java.io.IOException;
 import org.scaleborn.linereg.sampling.ModelSamplingFactory;
 import org.scaleborn.linereg.sampling.Sampling.CoefficientLinearTermSampling;
 import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.InterceptSampling;
 import org.scaleborn.linereg.sampling.Sampling.ResponseVarianceTermSampling;
 import org.scaleborn.linereg.sampling.io.StateInputStream;
 import org.scaleborn.linereg.sampling.io.StateOutputStream;
@@ -42,7 +44,7 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
   private static class ExactResponseVarianceTermSampling implements
       ResponseVarianceTermSampling<ExactResponseVarianceTermSampling> {
 
-    private ExactSamplingContext context;
+    private final ExactSamplingContext context;
 
     public ExactResponseVarianceTermSampling(
         final ExactSamplingContext context) {
@@ -51,8 +53,8 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
 
     @Override
     public double getResponseVariance() {
-      return context.responseSquareSum
-          - context.responseSum / context.getCount() * context.responseSum;
+      return this.context.responseSquareSum
+          - this.context.responseSum / this.context.getCount() * this.context.responseSum;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
   private static class ExactCoefficientLinearTermSampling implements
       CoefficientLinearTermSampling<ExactCoefficientLinearTermSampling> {
 
-    private ExactSamplingContext context;
+    private final ExactSamplingContext context;
 
     public ExactCoefficientLinearTermSampling(
         final ExactSamplingContext context) {
@@ -98,15 +100,16 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
        * TODO: Migrate to another algorithm to avoid sums of products, which can lead to numerical
        * instability as well as to arithmetic overflow.
        */
-      long count = context.getCount();
-      int featuresCount = context.getFeaturesCount();
-      double[] covariance = new double[context.getFeaturesCount()];
-      double[] featuresMean = context.getFeaturesMean();
-      double responseMean = context.getResponseMean();
+      final long count = this.context.getCount();
+      final int featuresCount = this.context.getFeaturesCount();
+      final double[] covariance = new double[this.context.getFeaturesCount()];
+      final double[] featuresMean = this.context.getFeaturesMean();
+      final double responseMean = this.context.getResponseMean();
       for (int i = 0; i < featuresCount; i++) {
         covariance[i] =
-            context.featuresResponseProductSum[i] - featuresMean[i] * context.responseSum
-                - responseMean * context.featureSums[i] + count * featuresMean[i] * responseMean;
+            this.context.featuresResponseProductSum[i] - featuresMean[i] * this.context.responseSum
+                - responseMean * this.context.featureSums[i]
+                + count * featuresMean[i] * responseMean;
       }
       return covariance;
     }
@@ -133,9 +136,53 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
   }
 
   @Override
-
   public CoefficientSquareTermSampling<?> createCoefficientSquareTermSampling(
       final ExactSamplingContext context) {
     return new ExactCoefficientSquareTermSampling(context);
+  }
+
+  @Override
+  public InterceptSampling<?> createInterceptSampling(final ExactSamplingContext context) {
+    return new ExactInterceptSampling(context);
+  }
+
+  private static class ExactInterceptSampling implements InterceptSampling<ExactInterceptSampling> {
+
+    private final ExactSamplingContext context;
+
+    public ExactInterceptSampling(
+        final ExactSamplingContext context) {
+      this.context = context;
+    }
+
+    @Override
+    public void saveState(final StateOutputStream destination) throws IOException {
+      // No state
+    }
+
+    @Override
+    public void loadState(final StateInputStream source) throws IOException {
+      // No state
+    }
+
+    @Override
+    public void sample(final double[] featureValues, final double responseValue) {
+      // Nothing to do, covered by ExactSamplingContext
+    }
+
+    @Override
+    public void merge(final ExactInterceptSampling fromSample) {
+      // Nothing to sample, covered by ExactSamplingContext
+    }
+
+    @Override
+    public double[] getFeaturesMean() {
+      return this.context.getFeaturesMean();
+    }
+
+    @Override
+    public double getResponseMean() {
+      return this.context.getResponseMean();
+    }
   }
 }

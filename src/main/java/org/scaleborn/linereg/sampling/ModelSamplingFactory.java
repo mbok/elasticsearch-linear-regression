@@ -18,6 +18,7 @@ package org.scaleborn.linereg.sampling;
 
 import org.scaleborn.linereg.sampling.Sampling.CoefficientLinearTermSampling;
 import org.scaleborn.linereg.sampling.Sampling.CoefficientSquareTermSampling;
+import org.scaleborn.linereg.sampling.Sampling.InterceptSampling;
 import org.scaleborn.linereg.sampling.Sampling.ResponseVarianceTermSampling;
 import org.scaleborn.linereg.sampling.Sampling.SamplingContext;
 
@@ -33,4 +34,6 @@ public interface ModelSamplingFactory<C extends SamplingContext<C>> {
   CoefficientLinearTermSampling<?> createCoefficientLinearTermSampling(C context);
 
   CoefficientSquareTermSampling<?> createCoefficientSquareTermSampling(C context);
+
+  InterceptSampling<?> createInterceptSampling(C context);
 }

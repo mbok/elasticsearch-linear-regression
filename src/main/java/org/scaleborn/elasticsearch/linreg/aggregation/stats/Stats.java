@@ -16,7 +16,7 @@
 
 package org.scaleborn.elasticsearch.linreg.aggregation.stats;
 
-import org.scaleborn.linereg.statistics.Statistics;
+import org.scaleborn.linereg.calculation.statistics.Statistics;
 
 /**
  * Created by mbok on 21.03.17.

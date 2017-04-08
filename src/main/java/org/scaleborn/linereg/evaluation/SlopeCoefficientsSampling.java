@@ -34,9 +34,9 @@ public interface SlopeCoefficientsSampling<Z extends SlopeCoefficientsSampling<Z
   class SlopeCoefficientsSamplingProxy<Y extends SlopeCoefficientsSamplingProxy<Y>> implements
       SlopeCoefficientsSampling<Y> {
 
-    private SamplingContext samplingContext;
-    private CoefficientLinearTermSampling coefficientLinearTermSampling;
-    private CoefficientSquareTermSampling coefficientSquareTermSampling;
+    private final SamplingContext samplingContext;
+    private final CoefficientLinearTermSampling coefficientLinearTermSampling;
+    private final CoefficientSquareTermSampling coefficientSquareTermSampling;
 
     public SlopeCoefficientsSamplingProxy(final SamplingContext<?> samplingContext,
         final CoefficientLinearTermSampling<?> coefficientLinearTermSampling,
@@ -69,10 +69,12 @@ public interface SlopeCoefficientsSampling<Z extends SlopeCoefficientsSampling<Z
 
     @SuppressWarnings("unchecked")
     @Override
-    public void merge(final SlopeCoefficientsSamplingProxy fromSample) {
-      this.samplingContext.merge(fromSample.samplingContext);
-      this.coefficientLinearTermSampling.merge(fromSample.coefficientLinearTermSampling);
-      this.coefficientSquareTermSampling.merge(fromSample.coefficientSquareTermSampling);
+    public void merge(final Y fromSample) {
+      this.samplingContext.merge(((SlopeCoefficientsSamplingProxy<Y>) fromSample).samplingContext);
+      this.coefficientLinearTermSampling
+          .merge(((SlopeCoefficientsSamplingProxy<Y>) fromSample).coefficientLinearTermSampling);
+      this.coefficientSquareTermSampling
+          .merge(((SlopeCoefficientsSamplingProxy<Y>) fromSample).coefficientSquareTermSampling);
     }
 
     @Override

@@ -28,8 +28,6 @@ import org.elasticsearch.search.internal.SearchContext;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseAggregationBuilder;
 import org.scaleborn.linereg.sampling.exact.ExactModelSamplingFactory;
 import org.scaleborn.linereg.sampling.exact.ExactSamplingContext;
-import org.scaleborn.linereg.statistics.StatsSampling;
-import org.scaleborn.linereg.statistics.StatsSampling.StatsSamplingProxy;
 
 /**
  * Created by mbok on 21.03.17.
@@ -42,21 +40,21 @@ public class StatsAggregationBuilder extends
   private static final ExactModelSamplingFactory MODEL_SAMPLING_FACTORY = new ExactModelSamplingFactory();
 
 
-  public StatsAggregationBuilder(String name) {
+  public StatsAggregationBuilder(final String name) {
     super(name);
   }
 
-  public StatsAggregationBuilder(StreamInput in) throws IOException {
+  public StatsAggregationBuilder(final StreamInput in) throws IOException {
     super(in);
   }
 
   @Override
-  protected StatsAggregatorFactory innerInnerBuild(SearchContext context,
-      List<NamedValuesSourceConfigSpec<Numeric>> configs, MultiValueMode multiValueMode,
-      AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder)
+  protected StatsAggregatorFactory innerInnerBuild(final SearchContext context,
+      final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
+      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
       throws IOException {
-    return new StatsAggregatorFactory(name, configs, multiValueMode, context, parent,
-        subFactoriesBuilder, metaData);
+    return new StatsAggregatorFactory(this.name, configs, multiValueMode, context, parent,
+        subFactoriesBuilder, this.metaData);
   }
 
 
@@ -65,13 +63,14 @@ public class StatsAggregationBuilder extends
     return NAME;
   }
 
-  static StatsSampling<?> buildSampling(final int featuresCount) {
-    ExactSamplingContext context = MODEL_SAMPLING_FACTORY
+  static StatsAggregationSampling buildSampling(final int featuresCount) {
+    final ExactSamplingContext context = MODEL_SAMPLING_FACTORY
         .createContext(featuresCount);
-    StatsSamplingProxy<?> statsSampling = new StatsSamplingProxy<>(context,
-        MODEL_SAMPLING_FACTORY.createResponseVarianceTermSampling(context),
+    final StatsAggregationSampling statsSampling = new StatsAggregationSampling(context,
         MODEL_SAMPLING_FACTORY.createCoefficientLinearTermSampling(context),
-        MODEL_SAMPLING_FACTORY.createCoefficientSquareTermSampling(context));
+        MODEL_SAMPLING_FACTORY.createCoefficientSquareTermSampling(context),
+        MODEL_SAMPLING_FACTORY.createInterceptSampling(context),
+        MODEL_SAMPLING_FACTORY.createResponseVarianceTermSampling(context));
     return statsSampling;
   }
 }
