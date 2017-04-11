@@ -16,21 +16,28 @@
 
 package org.scaleborn.elasticsearch.linreg;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
+import org.scaleborn.elasticsearch.linreg.aggregation.predict.InternalPrediction;
+import org.scaleborn.elasticsearch.linreg.aggregation.predict.PredictionAggregationBuilder;
+import org.scaleborn.elasticsearch.linreg.aggregation.predict.PredictionAggregationParser;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.InternalStats;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationBuilder;
-import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsParser;
+import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationParser;
 
 public class LinearRegressionPlugin extends Plugin implements SearchPlugin {
 
   @Override
   public List<AggregationSpec> getAggregations() {
-    return Collections.singletonList(
-        new AggregationSpec(StatsAggregationBuilder.NAME, StatsAggregationBuilder::new,
-            new StatsParser()).addResultReader(InternalStats::new));
+    final List<AggregationSpec> aggregations = new ArrayList<>();
+    aggregations.add(new AggregationSpec(StatsAggregationBuilder.NAME, StatsAggregationBuilder::new,
+        new StatsAggregationParser()).addResultReader(InternalStats::new));
+    aggregations.add(
+        new AggregationSpec(PredictionAggregationBuilder.NAME, PredictionAggregationBuilder::new,
+            new PredictionAggregationParser()).addResultReader(InternalPrediction::new));
+    return aggregations;
   }
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.elasticsearch.linreg.aggregation.stats;
+package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,11 +29,11 @@ import org.elasticsearch.search.internal.SearchContext;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseSamplingAggregator;
 
 /**
- * Created by mbok on 21.03.17.
+ * Created by mbok on 11.04.17.
  */
-public class StatsAggregator extends BaseSamplingAggregator<StatsAggregationSampling> {
+public class PredictionAggregator extends BaseSamplingAggregator<PredictionSampling> {
 
-  public StatsAggregator(final String name,
+  public PredictionAggregator(final String name,
       final List<NamedValuesSourceSpec<Numeric>> valuesSources,
       final SearchContext context,
       final Aggregator parent,
@@ -44,24 +44,22 @@ public class StatsAggregator extends BaseSamplingAggregator<StatsAggregationSamp
   }
 
   @Override
-  protected StatsAggregationSampling buildSampling(final int featuresCount) {
-    return StatsAggregationBuilder.buildSampling(featuresCount);
+  protected PredictionSampling buildSampling(final int featuresCount) {
+    return PredictionAggregationBuilder.buildSampling(featuresCount);
   }
-
 
   @Override
   protected InternalAggregation doBuildAggregation(final String name, final int featuresCount,
-      final StatsAggregationSampling statsAggregationSampling,
+      final PredictionSampling predictionSampling,
       final List<PipelineAggregator> pipelineAggregators,
       final Map<String, Object> stringObjectMap) {
-    return new InternalStats(this.name, this.valuesSources.fieldNames().length - 1,
-        statsAggregationSampling, null,
+    return new InternalPrediction(this.name, this.valuesSources.fieldNames().length - 1,
+        predictionSampling, null,
         pipelineAggregators(), metaData());
   }
 
   @Override
   public InternalAggregation buildEmptyAggregation() {
-    return new InternalStats(this.name, 0, null, null, pipelineAggregators(), metaData());
+    return new InternalPrediction(this.name, 0, null, null, pipelineAggregators(), metaData());
   }
-
 }

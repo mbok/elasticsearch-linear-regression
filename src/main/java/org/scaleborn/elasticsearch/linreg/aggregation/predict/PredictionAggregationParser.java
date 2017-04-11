@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.scaleborn.elasticsearch.linreg.aggregation.stats;
+package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.util.Map;
 import org.elasticsearch.common.ParseField;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseParser;
 
 /**
- * Created by mbok on 29.03.17.
+ * Created by mbok on 11.04.17.
  */
-public class StatsParser extends BaseParser<StatsAggregationBuilder> {
+public class PredictionAggregationParser extends BaseParser<PredictionAggregationBuilder> {
 
   @Override
-  protected StatsAggregationBuilder createInnerFactory(final String aggregationName,
+  protected PredictionAggregationBuilder createInnerFactory(final String aggregationName,
       final Map<ParseField, Object> otherOptions) {
-    return new StatsAggregationBuilder(aggregationName);
+    return new PredictionAggregationBuilder(aggregationName);
   }
 }

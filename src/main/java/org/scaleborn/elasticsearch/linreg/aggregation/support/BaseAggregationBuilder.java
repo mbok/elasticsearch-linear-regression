@@ -42,7 +42,7 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
 
   private MultiValueMode multiValueMode = MultiValueMode.AVG;
 
-  public S multiValueMode(MultiValueMode multiValueMode) {
+  public S multiValueMode(final MultiValueMode multiValueMode) {
     this.multiValueMode = multiValueMode;
     //noinspection unchecked
     return (S) this;
@@ -52,24 +52,24 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
     return this.multiValueMode;
   }
 
-  public BaseAggregationBuilder(String name) {
+  public BaseAggregationBuilder(final String name) {
     super(name, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
   }
 
   /**
    * Read from a stream.
    */
-  public BaseAggregationBuilder(StreamInput in) throws IOException {
+  public BaseAggregationBuilder(final StreamInput in) throws IOException {
     super(in, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
   }
 
   @Override
   protected final MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerBuild(
-      SearchContext context,
-      List<NamedValuesSourceConfigSpec<Numeric>> configs,
-      AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder)
+      final SearchContext context,
+      final List<NamedValuesSourceConfigSpec<Numeric>> configs,
+      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
       throws IOException {
-    return innerInnerBuild(context, configs, multiValueMode, parent, subFactoriesBuilder);
+    return innerInnerBuild(context, configs, this.multiValueMode, parent, subFactoriesBuilder);
   }
 
   protected abstract MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerInnerBuild(
@@ -79,14 +79,28 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
       throws IOException;
 
   @Override
-  public XContentBuilder doXContentBody(XContentBuilder builder, ToXContent.Params params)
+  public XContentBuilder doXContentBody(final XContentBuilder builder,
+      final ToXContent.Params params)
       throws IOException {
-    builder.field(MULTIVALUE_MODE_FIELD.getPreferredName(), multiValueMode);
+    builder.field(MULTIVALUE_MODE_FIELD.getPreferredName(), this.multiValueMode);
     return builder;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  protected void innerWriteTo(StreamOutput out) {
+  public S fields(final List<String> fields) {
+    super.fields(fields);
+    if (fields.size() < 2) {
+      throw new IllegalArgumentException(
+          "[fields] must reference at least two fields (multiple features and the response as the last field): ["
+              + this.name
+              + "]");
+    }
+    return (S) this;
+  }
+
+  @Override
+  protected void innerWriteTo(final StreamOutput out) {
     // Do nothing, no extra state to write to stream
   }
 
@@ -96,7 +110,7 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
   }
 
   @Override
-  protected boolean innerEquals(Object obj) {
+  protected boolean innerEquals(final Object obj) {
     return true;
   }
 }

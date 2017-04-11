@@ -34,33 +34,34 @@ import org.elasticsearch.search.internal.SearchContext;
 public abstract class BaseAggregatorFactory<AF extends BaseAggregatorFactory<AF>> extends
     AggregatorFactory<AF> {
 
-  private List<ValuesSourceConfig<Numeric>> featureConfigs;
-  private ValuesSourceConfig<Numeric> responseConfig;
+  private final List<ValuesSourceConfig<Numeric>> featureConfigs;
+  private final ValuesSourceConfig<Numeric> responseConfig;
 
-  public BaseAggregatorFactory(String name,
-      List<ValuesSourceConfig<Numeric>> featureConfigs, ValuesSourceConfig<Numeric> responseConfig,
-      SearchContext context,
-      AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder,
-      Map<String, Object> metaData) throws IOException {
+  public BaseAggregatorFactory(final String name,
+      final List<ValuesSourceConfig<Numeric>> featureConfigs,
+      final ValuesSourceConfig<Numeric> responseConfig,
+      final SearchContext context,
+      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder,
+      final Map<String, Object> metaData) throws IOException {
     super(name, context, parent, subFactoriesBuilder, metaData);
     this.featureConfigs = featureConfigs;
     this.responseConfig = responseConfig;
   }
 
   @Override
-  public Aggregator createInternal(Aggregator parent, boolean collectsFromSingleBucket,
-      List<PipelineAggregator> pipelineAggregators, Map<String, Object> metaData)
+  public Aggregator createInternal(final Aggregator parent, final boolean collectsFromSingleBucket,
+      final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
       throws IOException {
-    List<Numeric> featuresValuesSources = new ArrayList<>(featureConfigs.size());
-    for (ValuesSourceConfig<Numeric> featureConfig : featureConfigs) {
-      Numeric source = featureConfig.toValuesSource(context.getQueryShardContext());
+    final List<Numeric> featuresValuesSources = new ArrayList<>(this.featureConfigs.size());
+    for (final ValuesSourceConfig<Numeric> featureConfig : this.featureConfigs) {
+      Numeric source = featureConfig.toValuesSource(this.context.getQueryShardContext());
       if (source == null) {
         source = Numeric.EMPTY;
       }
       featuresValuesSources.add(source);
     }
-    Numeric responseSource = responseConfig
-        .toValuesSource(context.getQueryShardContext());
+    Numeric responseSource = this.responseConfig
+        .toValuesSource(this.context.getQueryShardContext());
     if (responseSource == null) {
       responseSource = Numeric.EMPTY;
     }
@@ -73,5 +74,6 @@ public abstract class BaseAggregatorFactory<AF extends BaseAggregatorFactory<AF>
       boolean collectsFromSingleBucket, List<PipelineAggregator> pipelineAggregators,
       Map<String, Object> metaData)
       throws IOException;
+
 
 }
