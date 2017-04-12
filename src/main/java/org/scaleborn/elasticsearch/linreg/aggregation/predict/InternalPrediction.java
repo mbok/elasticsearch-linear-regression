@@ -17,9 +17,13 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseInternalAggregation;
 import org.scaleborn.linereg.evaluation.SlopeCoefficients;
@@ -31,16 +35,28 @@ public class InternalPrediction extends
     BaseInternalAggregation<PredictionSampling, PredictionResults, InternalPrediction> implements
     Prediction {
 
+  private static final Logger LOGGER = Loggers.getLogger(InternalPrediction.class);
+
+  private final double[] inputs;
+
   protected InternalPrediction(final String name, final int featuresCount,
       final PredictionSampling sampling,
       final PredictionResults results,
-      final List<PipelineAggregator> pipelineAggregators,
+      final double[] inputs, final List<PipelineAggregator> pipelineAggregators,
       final Map<String, Object> metaData) {
     super(name, featuresCount, sampling, results, pipelineAggregators, metaData);
+    this.inputs = inputs;
   }
 
   public InternalPrediction(final StreamInput in) throws IOException {
     super(in, PredictionResults::new);
+    this.inputs = in.readDoubleArray();
+  }
+
+  @Override
+  protected void doWriteTo(final StreamOutput out) throws IOException {
+    super.doWriteTo(out);
+    out.writeDoubleArray(this.inputs);
   }
 
   @Override
@@ -68,15 +84,20 @@ public class InternalPrediction extends
   protected InternalPrediction buildInternalAggregation(final String name, final int featuresCount,
       final PredictionSampling linRegSampling, final PredictionResults results,
       final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData) {
-    return new InternalPrediction(name, featuresCount, linRegSampling, results, pipelineAggregators,
+    return new InternalPrediction(name, featuresCount, linRegSampling, results, this.inputs,
+        pipelineAggregators,
         metaData);
   }
 
   @Override
   protected PredictionResults buildResults(final PredictionSampling composedSampling,
-      final SlopeCoefficients slopeCoefficients) {
-    // TODO calculate predicated value
-    return new PredictionResults(2, slopeCoefficients);
+      final SlopeCoefficients slopeCoefficients, final double intercept) {
+    double predictedValue = intercept;
+    LOGGER.info("Predicting values for inputs: {}", Arrays.toString(this.inputs));
+    for (int i = 0; i < this.featuresCount; i++) {
+      predictedValue += slopeCoefficients.getCoefficients()[i] * this.inputs[i];
+    }
+    return new PredictionResults(predictedValue, slopeCoefficients, intercept);
   }
 
   @Override

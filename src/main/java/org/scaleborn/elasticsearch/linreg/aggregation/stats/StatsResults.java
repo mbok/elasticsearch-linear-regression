@@ -38,8 +38,9 @@ public class StatsResults extends ModelResults {
 
   final Statistics statistics;
 
-  public StatsResults(final SlopeCoefficients slopeCoefficients, final Statistics statistics) {
-    super(slopeCoefficients);
+  public StatsResults(final SlopeCoefficients slopeCoefficients, final double intercept,
+      final Statistics statistics) {
+    super(slopeCoefficients, intercept);
     this.statistics = statistics;
   }
 

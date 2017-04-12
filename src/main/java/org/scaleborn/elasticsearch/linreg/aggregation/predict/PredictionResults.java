@@ -32,8 +32,8 @@ public class PredictionResults extends ModelResults {
   private final double predictedValue;
 
   public PredictionResults(final double predictedValue,
-      final SlopeCoefficients slopeCoefficients) {
-    super(slopeCoefficients);
+      final SlopeCoefficients slopeCoefficients, final double intercept) {
+    super(slopeCoefficients, intercept);
     this.predictedValue = predictedValue;
   }
 

@@ -56,7 +56,7 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
   /**
    * Features count
    */
-  private final int featuresCount;
+  protected final int featuresCount;
 
   protected M results;
 
@@ -167,7 +167,8 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
       final M results,
       final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData);
 
-  protected abstract M buildResults(S composedSampling, SlopeCoefficients slopeCoefficients);
+  protected abstract M buildResults(S composedSampling, SlopeCoefficients slopeCoefficients,
+      double intercept);
 
 
   private M evaluateResults(final S composedSampling) {
@@ -176,8 +177,7 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
         .buildDerivationEquation(composedSampling);
     final SlopeCoefficients slopeCoefficients = derivationEquationSolver
         .solveCoefficients(derivationEquation);
-    final M buildResults = buildResults(composedSampling, slopeCoefficients);
-    buildResults.setIntercept(
+    final M buildResults = buildResults(composedSampling, slopeCoefficients,
         interceptCalculator.calculate(slopeCoefficients, composedSampling, composedSampling));
     return buildResults;
   }

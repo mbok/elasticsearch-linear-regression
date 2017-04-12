@@ -32,21 +32,22 @@ public class ModelResults implements Writeable, ToXContent {
 
   private SlopeCoefficients slopeCoefficients;
 
-  private Double intercept;
+  private double intercept;
 
-  public ModelResults(final SlopeCoefficients slopeCoefficients) {
+  public ModelResults(final SlopeCoefficients slopeCoefficients, final double intercept) {
     this.slopeCoefficients = slopeCoefficients;
+    this.intercept = intercept;
   }
 
   public ModelResults(final StreamInput in) throws IOException {
     this.slopeCoefficients = new DefaultSlopeCoefficients(in.readDoubleArray());
-    this.intercept = in.readOptionalDouble();
+    this.intercept = in.readDouble();
   }
 
   @Override
   public void writeTo(final StreamOutput out) throws IOException {
     out.writeDoubleArray(this.slopeCoefficients.getCoefficients());
-    out.writeOptionalDouble(this.intercept);
+    out.writeDouble(this.intercept);
   }
 
   public SlopeCoefficients getSlopeCoefficients() {
@@ -58,7 +59,7 @@ public class ModelResults implements Writeable, ToXContent {
   }
 
   public double getIntercept() {
-    return this.intercept != null ? this.intercept : 0;
+    return this.intercept;
   }
 
   public void setIntercept(final double intercept) {
@@ -78,9 +79,7 @@ public class ModelResults implements Writeable, ToXContent {
   public XContentBuilder toXContent(final XContentBuilder builder, final Params params)
       throws IOException {
     builder.array("coefficients", this.getSlopeCoefficients().getCoefficients());
-    if (this.intercept != null) {
-      builder.field("intercept", this.getIntercept());
-    }
+    builder.field("intercept", this.getIntercept());
     return builder;
   }
 

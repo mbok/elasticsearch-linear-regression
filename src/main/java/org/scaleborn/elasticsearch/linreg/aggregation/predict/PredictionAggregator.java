@@ -33,14 +33,17 @@ import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseSamplingAggreg
  */
 public class PredictionAggregator extends BaseSamplingAggregator<PredictionSampling> {
 
+  private final double[] inputs;
+
   public PredictionAggregator(final String name,
       final List<NamedValuesSourceSpec<Numeric>> valuesSources,
       final SearchContext context,
       final Aggregator parent,
       final MultiValueMode multiValueMode,
-      final List<PipelineAggregator> pipelineAggregators,
+      final double[] inputs, final List<PipelineAggregator> pipelineAggregators,
       final Map<String, Object> metaData) throws IOException {
     super(name, valuesSources, context, parent, multiValueMode, pipelineAggregators, metaData);
+    this.inputs = inputs;
   }
 
   @Override
@@ -54,12 +57,13 @@ public class PredictionAggregator extends BaseSamplingAggregator<PredictionSampl
       final List<PipelineAggregator> pipelineAggregators,
       final Map<String, Object> stringObjectMap) {
     return new InternalPrediction(this.name, this.valuesSources.fieldNames().length - 1,
-        predictionSampling, null,
+        predictionSampling, null, this.inputs,
         pipelineAggregators(), metaData());
   }
 
   @Override
   public InternalAggregation buildEmptyAggregation() {
-    return new InternalPrediction(this.name, 0, null, null, pipelineAggregators(), metaData());
+    return new InternalPrediction(this.name, 0, null, null, this.inputs, pipelineAggregators(),
+        metaData());
   }
 }

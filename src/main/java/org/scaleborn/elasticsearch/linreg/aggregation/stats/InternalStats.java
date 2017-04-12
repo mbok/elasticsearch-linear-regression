@@ -105,10 +105,10 @@ public class InternalStats extends
 
   @Override
   protected StatsResults buildResults(final StatsAggregationSampling composedSampling,
-      final SlopeCoefficients slopeCoefficients) {
+      final SlopeCoefficients slopeCoefficients, final double intercept) {
     final Statistics stats = statsCalculator
         .calculate(new StatsModel(composedSampling, slopeCoefficients));
-    return new StatsResults(slopeCoefficients, stats);
+    return new StatsResults(slopeCoefficients, intercept, stats);
   }
 
 }

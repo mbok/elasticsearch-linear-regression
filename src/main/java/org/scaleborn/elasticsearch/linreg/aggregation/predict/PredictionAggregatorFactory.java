@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.Aggregator;
-import org.elasticsearch.search.aggregations.AggregatorFactories;
+import org.elasticsearch.search.aggregations.AggregatorFactories.Builder;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
@@ -37,14 +37,16 @@ public class PredictionAggregatorFactory extends
     MultiValuesSourceAggregatorFactory<Numeric, PredictionAggregatorFactory> {
 
   private final MultiValueMode multiValueMode;
+  private final double[] inputs;
 
   public PredictionAggregatorFactory(final String name,
       final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
-      final SearchContext context, final AggregatorFactory<?> parent,
-      final AggregatorFactories.Builder subFactoriesBuilder,
+      final double[] inputs, final SearchContext context, final AggregatorFactory<?> parent,
+      final Builder subFactoriesBuilder,
       final Map<String, Object> metaData) throws IOException {
     super(name, configs, context, parent, subFactoriesBuilder, metaData);
     this.multiValueMode = multiValueMode;
+    this.inputs = inputs;
   }
 
   @Override
@@ -52,6 +54,7 @@ public class PredictionAggregatorFactory extends
       final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
       throws IOException {
     return new PredictionAggregator(this.name, null, this.context, parent, this.multiValueMode,
+        this.inputs,
         pipelineAggregators, metaData);
   }
 
@@ -61,7 +64,7 @@ public class PredictionAggregatorFactory extends
       final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
       throws IOException {
     return new PredictionAggregator(this.name, valuesSources, this.context, parent,
-        this.multiValueMode,
+        this.multiValueMode, this.inputs,
         pipelineAggregators, metaData);
   }
 }

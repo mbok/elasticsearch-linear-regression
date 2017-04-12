@@ -100,7 +100,7 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
   }
 
   @Override
-  protected void innerWriteTo(final StreamOutput out) {
+  protected void innerWriteTo(final StreamOutput out) throws IOException {
     // Do nothing, no extra state to write to stream
   }
 

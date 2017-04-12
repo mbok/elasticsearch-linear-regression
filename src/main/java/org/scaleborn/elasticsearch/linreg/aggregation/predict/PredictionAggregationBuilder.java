@@ -18,7 +18,9 @@ package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.AggregatorFactories.Builder;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
@@ -39,6 +41,7 @@ public class PredictionAggregationBuilder extends
   public static final String NAME = "linreg_predict";
 
   private static final ExactModelSamplingFactory MODEL_SAMPLING_FACTORY = new ExactModelSamplingFactory();
+  private double[] inputs;
 
   public PredictionAggregationBuilder(final String name) {
     super(name);
@@ -47,15 +50,30 @@ public class PredictionAggregationBuilder extends
   public PredictionAggregationBuilder(final StreamInput in)
       throws IOException {
     super(in);
+    this.inputs = in.readDoubleArray();
   }
 
+  @Override
+  protected void innerWriteTo(final StreamOutput out) throws IOException {
+    super.innerWriteTo(out);
+    out.writeDoubleArray(this.inputs);
+  }
 
   @Override
   protected MultiValuesSourceAggregatorFactory<Numeric, ?> innerInnerBuild(
       final SearchContext context,
       final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
       final AggregatorFactory<?> parent, final Builder subFactoriesBuilder) throws IOException {
-    return new PredictionAggregatorFactory(this.name, configs, multiValueMode, context, parent,
+    if (this.inputs == null || this.inputs.length != configs.size() - 1) {
+      throw new IllegalArgumentException(
+          "[inputs] must have [" + (configs.size() - 1)
+              + "] values as much as the number of feature fields: ["
+              + this.name
+              + "]");
+    }
+    return new PredictionAggregatorFactory(this.name, configs, multiValueMode, this.inputs,
+        context,
+        parent,
         subFactoriesBuilder, this.metaData);
   }
 
@@ -72,5 +90,24 @@ public class PredictionAggregationBuilder extends
         MODEL_SAMPLING_FACTORY.createCoefficientSquareTermSampling(context),
         MODEL_SAMPLING_FACTORY.createInterceptSampling(context));
     return predictionSampling;
+  }
+
+  public void inputs(final double[] inputs) {
+    this.inputs = inputs;
+  }
+
+  public double[] inputs() {
+    return this.inputs;
+  }
+
+  @Override
+  protected int innerHashCode() {
+    return Objects.hash(this.inputs);
+  }
+
+  @Override
+  protected boolean innerEquals(final Object obj) {
+    final PredictionAggregationBuilder other = (PredictionAggregationBuilder) obj;
+    return Objects.equals(this.inputs, other.inputs);
   }
 }
