@@ -149,14 +149,14 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
 
     final S composedSampling = buildSampling(this.featuresCount);
     for (int i = 0; i < aggs.size(); ++i) {
-      LOGGER.info("Merging sampling={}: {}", i, ((BaseInternalAggregation) aggs.get(i)).sampling);
+      LOGGER.debug("Merging sampling={}: {}", i, ((BaseInternalAggregation) aggs.get(i)).sampling);
       //noinspection unchecked
       composedSampling.merge((S) ((BaseInternalAggregation) aggs.get(i)).sampling);
     }
 
     final M evaluatedResults = evaluateResults(composedSampling);
 
-    LOGGER.info("Evaluated results: {}", evaluatedResults);
+    LOGGER.debug("Evaluated results: {}", evaluatedResults);
     return buildInternalAggregation(this.name, this.featuresCount, composedSampling,
         evaluatedResults,
         pipelineAggregators(), getMetaData());

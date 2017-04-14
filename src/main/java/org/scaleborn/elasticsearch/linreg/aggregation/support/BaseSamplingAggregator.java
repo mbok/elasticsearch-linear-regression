@@ -51,6 +51,8 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
 
   protected ObjectArray<S> samplings;
 
+  private int fieldsCount;
+
   public BaseSamplingAggregator(final String name,
       final List<NamedValuesSourceSpec<Numeric>> valuesSources,
       final SearchContext context,
@@ -61,6 +63,7 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
     if (valuesSources != null && !valuesSources.isEmpty()) {
       this.valuesSources = new NumericMultiValuesSource(valuesSources, multiValueMode);
       this.samplings = context.bigArrays().newObjectArray(1);
+      this.fieldsCount = this.valuesSources.fieldNames().length;
     } else {
       this.valuesSources = null;
     }
@@ -78,15 +81,13 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
       return LeafBucketCollector.NO_OP_COLLECTOR;
     }
     final BigArrays bigArrays = this.context.bigArrays();
-    final NumericDoubleValues[] values = new NumericDoubleValues[this.valuesSources
-        .fieldNames().length];
-    for (int i = 0; i < values.length; ++i) {
+    final NumericDoubleValues[] values = new NumericDoubleValues[this.fieldsCount];
+    for (int i = 0; i < this.fieldsCount; ++i) {
       values[i] = this.valuesSources.getField(i, ctx);
     }
 
     return new LeafBucketCollectorBase(sub, values) {
-      final String[] fieldNames = BaseSamplingAggregator.this.valuesSources.fieldNames();
-      final double[] fieldVals = new double[this.fieldNames.length];
+      final double[] fieldVals = new double[BaseSamplingAggregator.this.fieldsCount];
 
       @Override
       public void collect(final int doc, final long bucket) throws IOException {
@@ -97,13 +98,14 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
           S sampling = BaseSamplingAggregator.this.samplings.get(bucket);
           // add document fields to correlation stats
           if (sampling == null) {
-            sampling = buildSampling(this.fieldNames.length - 1);
+            sampling = buildSampling(BaseSamplingAggregator.this.fieldsCount - 1);
             BaseSamplingAggregator.this.samplings.set(bucket, sampling);
           }
-          LOGGER.info("Sampling for bucket={}, fields={}", bucket, this.fieldVals);
-          sampling.sample(this.fieldVals, this.fieldVals[this.fieldVals.length - 1]);
+          // LOGGER.info("Sampling for bucket={}, fields={}", bucket, this.fieldVals);
+          sampling
+              .sample(this.fieldVals, this.fieldVals[BaseSamplingAggregator.this.fieldsCount - 1]);
         } else {
-          LOGGER.warn("Skipped bucket={}, fields={}", bucket, this.fieldVals);
+          // LOGGER.warn("Skipped bucket={}, fields={}", bucket, this.fieldVals);
         }
       }
 
@@ -112,7 +114,7 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
        */
       private boolean includeDocument(final int doc) {
         // loop over fields
-        for (int i = 0; i < this.fieldVals.length; ++i) {
+        for (int i = 0; i < BaseSamplingAggregator.this.fieldsCount; ++i) {
           final NumericDoubleValues doubleValues = values[i];
           final double value = doubleValues.get(doc);
           // skip if value is missing

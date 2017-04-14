@@ -17,7 +17,6 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.Logger;
@@ -93,7 +92,7 @@ public class InternalPrediction extends
   protected PredictionResults buildResults(final PredictionSampling composedSampling,
       final SlopeCoefficients slopeCoefficients, final double intercept) {
     double predictedValue = intercept;
-    LOGGER.info("Predicting values for inputs: {}", Arrays.toString(this.inputs));
+    LOGGER.debug("Predicting values for inputs: {}", this.inputs);
     for (int i = 0; i < this.featuresCount; i++) {
       predictedValue += slopeCoefficients.getCoefficients()[i] * this.inputs[i];
     }

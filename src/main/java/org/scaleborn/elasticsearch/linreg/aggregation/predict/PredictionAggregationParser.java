@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.ParsingException;
-import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentParser.Token;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseParser;
@@ -33,7 +31,6 @@ import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseParser;
  */
 public class PredictionAggregationParser extends BaseParser<PredictionAggregationBuilder> {
 
-  private static final Logger LOGGER = Loggers.getLogger(PredictionAggregationParser.class);
   private static final ParseField INPUTS = new ParseField("inputs");
 
 
@@ -73,7 +70,6 @@ public class PredictionAggregationParser extends BaseParser<PredictionAggregatio
         }
       }
       otherOptions.put(INPUTS, inputFields);
-      LOGGER.info("Parsed input fields: {}", inputFields);
       return true;
     }
     return false;

@@ -27,6 +27,9 @@ import org.scaleborn.elasticsearch.linreg.aggregation.stats.InternalStats;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationBuilder;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationParser;
 
+/**
+ * Plugin definition for linear regression aggregations.
+ */
 public class LinearRegressionPlugin extends Plugin implements SearchPlugin {
 
   @Override
