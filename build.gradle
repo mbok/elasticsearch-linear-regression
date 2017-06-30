@@ -89,7 +89,7 @@ task buildPluginZip(type: Zip, dependsOn: [':jar', ':makePluginDescriptor']) {
     from configurations.distJars
     from 'build/tmp/plugin'
     into 'elasticsearch'
-    classifier 'plugin'
+    // classifier 'plugin'
 }
 
 task unpackPlugin(type: Copy, dependsOn: [':buildPluginZip']) {

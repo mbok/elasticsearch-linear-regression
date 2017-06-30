@@ -1,10 +1,18 @@
 sudo: false
 language: java
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 cache:
   directories:
-    - $HOME/.m2
-
+  - $HOME/.m2
 script: ./gradlew check
+
+deploy:
+  provider: releases
+  api_key:
+    secure: E3B6nPMZNBJQZzjex5J11fmQnanm+WeNsEIDD00PbdmDrAb649rdoQ8CHjn14nxdjCoZ9n9Pox8KAi1GiWfN6NGx5Q1dp6OOQ3WFXkqP6O9PFC/zyb0GfNYO67kERvKXUDUgucsqYoXvGi7IP3zHZPsxxTzCJw7xwo4yml61QfCeAqfEhY7IVJ1QQh3YXz1FT6yytMEpKWUbFjKBXwlToLZcN1bVlPi4cJilzbsbR5etjIHMzw/4xiaVfYs57NTIdgopIS+p518up3vuRc/HouC2NT/ABqoQyESNJLiINkRe7zktGSa2kF12B2iCGreE/qFXndu+1sq9cOUyGOrPvf6hcdc+MVCxc9a0ZgTc54o2CnXyKLsXAYdT8hli6x9wnLCvCSGlQ0Kgaw6bXzPHUpLDgTxBq/QZF0zACHbfmCDV+C+CyBx5w/4Q/PsZKbjd55wlyY2B2rA2H60jvLMXXU6TbY6ItCN+3vbynvH/LIrkeQOR9HM1+0WgrUAdTggds8Y+JlLah9kJQOG7Dy0qRK05YqPD61Vbbfmprs3IQIG/uDqDZ+0VkJwbCljJqmPL902YR/rqEsAKK0hkfQNRKJ8qDgre7ygFfmnKtL8NHM6ThR8yLcxdWahk2nOvCMwkWSB9xas1S4IxnstSaxZyI/p1Vt54eEwurl+GczEKPr4=
+  file_glob: true
+  file: build/distributions/elasticsearch-linear-regression*.zip
+  on:
+    tags: true
+    repo: scaleborn/elasticsearch-linear-regression
