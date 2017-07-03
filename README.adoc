@@ -18,7 +18,7 @@ Estimation is performed regarding the https://en.wikipedia.org/wiki/Ordinary_lea
 
 
 ## Aggregations
-The aggregations estimate the linear regression coefficients
+Both aggregations are numeric aggregations that estimate the linear regression coefficients
 image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,.%20.%20.,%20\theta_C%20[]
 based on document results of a search query. Each search result
 document is handled as an observation and the numerical fields as variables (explanatory and response)
@@ -27,8 +27,7 @@ for the linear model.
 
 === Linear Regression Stats
 
-The `linreg_stats` aggregation is a numeric aggregation that computes statistics for the estimated
-linear regression model over a set of document fields standing for the response and the explanatory variables.
+The `linreg_stats` aggregation computes statistics for the estimated linear regression model.
 
 [horizontal]
 `rss`:: Residual sum of squares as a measure of the discrepancy between the data and the estimated model.
@@ -36,9 +35,9 @@ linear regression model over a set of document fields standing for the response 
 `mse`:: Mean squared error or rather `rss` divided by the number of documents consumed for model estimation.
 `coefficients`:: Slope coefficients
   image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
-    of the linear function estimated regarding least-squares regression.
+    of the linear linear hypothesis function ``h(x)``.
 `intercept`:: Intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
-                 of the linear function estimated regarding least-squares regression.
+                 of the linear hypothesis function ``h(x)``.
 
 
 ## Installation
