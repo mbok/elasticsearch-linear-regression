@@ -27,7 +27,7 @@ model over a set of document fields standing for the response and the explanator
         The lower the `rss` number, the smaller the error of the prediction, and the better the model.
 `mse`:: Mean squared error or rather `rss` divided by the number of documents consumed for model estimation.
 `coefficients`:: Slope coefficients
-  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,%20...,%20\theta_C%20[]
+  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,....,%20\theta_C%20[]
     of the linear function estimated regarding least-squares regression.
 `intercept`:: Intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
                  of the linear function estimated regarding least-squares regression.
