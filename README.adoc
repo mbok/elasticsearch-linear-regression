@@ -1,33 +1,39 @@
-# A linear regression plugin for Elasticsearch
+# A multiple linear regression plugin for Elasticsearch
 
 image:https://travis-ci.org/scaleborn/elasticsearch-linear-regression.svg?branch=master["Build Status", link="https://travis-ci.org/scaleborn/elasticsearch-linear-regression"]
 
-Linear regression is one of the most well known algorithms in machine learning. It defines a predictive model for the value
-of a response variable based on a training data set of explanatory variables when the relationship between the variables can be
-described with a linear model. This technique belongs to the supervised learning algorithms in machine learning.
+Linear regression model has been a mainstay of statistics and machine learning
+in the past decades and remains one of the most important tools in context of supervised learning algorithms.
+It's a powerful technique for prediction of the value of a dependent variable `y` (called response variable) given the values of another independent
+variables `x = (x~1~, x~2~,...,x~C~)` (called explanatory variables) based on a training data set. Prediction of the response variable with respect to the input values
+ for the explanatory variables is described by the linear hypothesis function ``h(x)`` with
 
-The core idea behind this plugin is to utilize the index data in Elasticsearch during search 
-as a linear regression model in order to expose information like
+image:http://latex.codecogs.com/gif.latex?h(x)%20=%20\theta_{0}%20+%20\sum_{j=1}^C%20\theta_{j}%20x_{j}[]
 
-* prediction of a value for the target variable,
-* anomaly detection,
-* measuring the accuracy or rather predictiveness of the model
-* and much more.
+This plugin enhances Elasticsearch's query engine by two new aggregations, which utilize the index data during search
+for estimating a linear regression model in order to expose information like prediction of a value for the target variable,
+anomaly detection and measuring the accuracy or rather predictiveness of the model.
 
 
 ## Aggregations
+The aggregations estimate the linear regression coefficients
+image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,.%20.%20.,%20\theta_C%20[]
+based on document results of a search query. Each search result
+document is handled as an observation and the numerical fields as variables (explanatory and response)
+for the linear model.
+
 
 === Linear Regression Stats
 
-The `linreg_stats` aggregation is a numeric aggregation that computes a linear regression
-model over a set of document fields standing for the response and the explanatory variables.
+The `linreg_stats` aggregation is a numeric aggregation that computes statistics for the estimated
+linear regression model over a set of document fields standing for the response and the explanatory variables.
 
 [horizontal]
 `rss`:: Residual sum of squares as a measure of the discrepancy between the data and the estimated model.
         The lower the `rss` number, the smaller the error of the prediction, and the better the model.
 `mse`:: Mean squared error or rather `rss` divided by the number of documents consumed for model estimation.
 `coefficients`:: Slope coefficients
-  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.%20.,%20\theta_C%20[]
+  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
     of the linear function estimated regarding least-squares regression.
 `intercept`:: Intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
                  of the linear function estimated regarding least-squares regression.
