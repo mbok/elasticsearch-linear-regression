@@ -13,6 +13,8 @@ image:http://latex.codecogs.com/gif.latex?h(x)%20=%20\theta_{0}%20+%20\sum_{j=1}
 This plugin enhances Elasticsearch's query engine by two new aggregations, which utilize the index data during search
 for estimating a linear regression model in order to expose information like prediction of a value for the target variable,
 anomaly detection and measuring the accuracy or rather predictiveness of the model.
+The coefficients of the multiple linear model are estimated regarding the https://en.wikipedia.org/wiki/Ordinary_least_squares[OLS]
+(ordinary least-squares) approach over the result set.
 
 
 ## Aggregations
