@@ -39,6 +39,43 @@ The `linreg_stats` aggregation computes statistics for the estimated linear regr
 `intercept`:: Intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
                  of the linear hypothesis function ``h(x)``.
 
+Assuming the data consists of documents representing house prices we can compute statistics for
+the estimated best fitting linear hypothesis function which predicts house prices based on number of
+rooms and living space with
+[source,js]
+--------------------------------------------------
+{
+    "aggs": {
+        "house_prices": {
+            "linreg_stats": {
+                "fields": ["rooms", "space", "price"]
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+The aggregation type is `linreg_stats` and the `fields` setting defines the set of fields (as an array)
+interpreted as explanatory variables and the last as the response variable for computing the linear
+regression and the statistics. The above request returns the following response:
+
+[source,js]
+--------------------------------------------------
+{
+    ...
+    "aggregations": {
+        "house_prices": {
+            "rss": 75608.9,
+            "mse": 3780.445,
+            "coefficients": [
+              0.384728,
+              3.109388
+            ],
+            "intercept": 36678.7
+        }
+    }
+}
+--------------------------------------------------
 
 ## Installation
 
