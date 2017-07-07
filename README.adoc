@@ -40,7 +40,7 @@ regarding the estimated model with respect to a set of given input values for th
                  of the linear hypothesis function ``h(x)``.
 
 Assuming the data consists of documents representing sold house prices with features
- like number of bedrooms, bathrooms and size etc. We can use this data to predict or validate
+ like number of bedrooms, bathrooms and size etc. we can predict or validate
  the price for our house in Morro Bay with 2000 square feet, 4 bedrooms and 2 bathrooms.
 
 [source,js]
