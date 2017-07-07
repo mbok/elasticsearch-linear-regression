@@ -55,8 +55,8 @@ Assuming the data consists of documents representing sold house prices with feat
     "aggs": {
         "house_prices": {
             "linreg_predict": {
-                "fields": ["size", "bedrooms", "bathrooms", "price"], <1>
-                "inputs": [2000, 4, 2] <2>
+                "fields": ["size", "bedrooms", "bathrooms", "price"],
+                "inputs": [2000, 4, 2]
             }
         }
     }
