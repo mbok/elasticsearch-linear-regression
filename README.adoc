@@ -172,6 +172,6 @@ Do not forget to restart the node after installing.
 ...
 
 ## License
-Copyright 2016 Scaleborn UG (haftungsbeschränkt).
+Copyright 2017 Scaleborn UG (haftungsbeschränkt).
 
 Licensed under the Apache License 2.0.
