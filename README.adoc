@@ -24,8 +24,74 @@ based on document results of a search query. Each search result
 document is handled as an observation and the numerical fields as variables (explanatory and response)
 for the linear model.
 
+=== Aggregation for prediction
 
-=== Linear Regression Stats
+The `linreg_predict` aggregation computes the predicted outcome for the response variable
+regarding the estimated model with respect to a set of given input values for the explanatory variables.
+
+[horizontal]
+`value`:: The predicted value for the response variable computed using the estimated linear hypothesis
+          function ``h(x)`` with `x` given by `C` input values for the explanatory variables
+          `x = [x~1~, x~2~,...,x~C~]`.
+`coefficients`:: Estimated slope coefficients
+  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
+    of the linear linear hypothesis function ``h(x)``.
+`intercept`:: Estimated intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
+                 of the linear hypothesis function ``h(x)``.
+
+Assuming the data consists of documents representing sold house prices with features
+ like number of bedrooms, bathrooms and size etc. We can use this data to predict or validate
+ the price for our house in Morro Bay with 2000 square feet, 4 bedrooms and 2 bathrooms.
+
+[source,js]
+--------------------------------------------------
+/houses/_search?size=0
+{
+    "query": {
+        "match" : {
+            "location" : "Morro Bay"
+        }
+    },
+    "aggs": {
+        "house_prices": {
+            "linreg_predict": {
+                "fields": ["size", "bedrooms", "bathrooms", "price"], <1>
+                "inputs": [2000, 4, 2] <2>
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+<1> `fields` instructs this aggregation to use for the linear regression model the house feature fields `size`, `bedrooms` and `bathrooms`
+    as explanatory variables and the `price` field as the response variable. The size of the `fields` array is `C + 1`
+    with `C` entries for the explanatory variables and one entry for the response variable.
+<2> `inputs` passes the feature values of our house we like to predict the price for. The numeric input values
+    have to be passed in array form in the order corresponding to the features listed in the `fields` attribute.
+    The size of the `inputs` array is `C` equivalent to the number of the explanatory variables.
+
+And the following may be the response with the estimated price for our house:
+
+[source,js]
+--------------------------------------------------
+{
+    ...
+    "aggregations": {
+        "my_house_price": {
+            "value": 581458.3087492324,
+            "coefficients": [
+                248.92285661317254,
+                -68297.7720278421,
+                64406.52205356777
+            ],
+            "intercept": 227990.63952712028
+        }
+    }
+}
+--------------------------------------------------
+
+
+=== Aggregation for linear regression statistics
 
 The `linreg_stats` aggregation computes statistics for the estimated linear regression model.
 
@@ -41,14 +107,15 @@ The `linreg_stats` aggregation computes statistics for the estimated linear regr
 
 Assuming the data consists of documents representing house prices we can compute statistics for
 the estimated best fitting linear hypothesis function which predicts house prices based on number of
-rooms and living space with
+bedrooms, bathrooms and size with
 [source,js]
 --------------------------------------------------
+/houses/_search?size=0
 {
     "aggs": {
         "house_prices": {
             "linreg_stats": {
-                "fields": ["rooms", "space", "price"]
+                "fields": ["bedrooms", "bathrooms", "size", "price"]
             }
         }
     }
@@ -56,8 +123,8 @@ rooms and living space with
 --------------------------------------------------
 
 The aggregation type is `linreg_stats` and the `fields` setting defines the set of fields (as an array)
-interpreted as explanatory variables and the last as the response variable for computing the linear
-regression and the statistics. The above request returns the following response:
+to be used for building the linear model. The first one to many fields stand for the explanatory variables
+and the last for the response variable. The above request returns the following response:
 
 [source,js]
 --------------------------------------------------
@@ -65,13 +132,14 @@ regression and the statistics. The above request returns the following response:
     ...
     "aggregations": {
         "house_prices": {
-            "rss": 75608.9,
-            "mse": 3780.445,
+            "rss": 49523788338938.734,
+            "mse": 63410740510.80504,
             "coefficients": [
-              0.384728,
-              3.109388
+                -100544.0725894584,
+                45981.15827544966,
+                309.6013051477475
             ],
-            "intercept": 36678.7
+            "intercept": 47553.18737564783
         }
     }
 }
