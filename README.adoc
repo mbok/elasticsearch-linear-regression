@@ -147,6 +147,7 @@ and the last for the response variable. The above request returns the following 
 
 === Data conditions
 Due to algorithmic constraints both aggregations result an empty response, if
+
 * the search result size is less or equal than the number of indicated explanatory variables,
 * values of the explanatory variables in the search result set is linearly dependent (that means
   that a column can be written as a linear combination of the other columns)
