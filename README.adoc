@@ -145,6 +145,27 @@ and the last for the response variable. The above request returns the following 
 }
 --------------------------------------------------
 
+=== Data conditions
+Due to algorithmic constraints both aggregations result an empty response, if
+* the search result size is less or equal than the number of indicated explanatory variables,
+* values of the explanatory variables in the search result set is linearly dependent (that means
+  that a column can be written as a linear combination of the other columns)
+
+
+## Algorithm
+This implementation is based on a new parallel, single-pass OLS estimation algorithm for multiple linear regression
+(not yet published). By aggregating
+over the data only once and in parallel the algorithm is ideally suited for large-scale, distributed data sets and
+in this respect surpasses the majority of existing multi-pass analytical OLS estimators or iterative optimization algorithms.
+
+The overall complexity of the implemented algorithm to estimate the regression coefficients is `O(N C² + C³)`, where
+`N` denotes the size of the training data set (the number of documents in the search result set) and `C` the number
+of the indicated explanatory variables (fields).
+
+## Examples
+...
+
+
 ## Installation
 
 ### Elasticsearch 5.x
@@ -165,18 +186,6 @@ Do not forget to restart the node after installing.
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  1, 2017
 |===
 
-## Algorithm
-This implementation is based on a new parallel, single-pass OLS estimation algorithm for multiple linear regression
-(not yet published). By aggregating
-over the data only once and in parallel the algorithm is ideally suited for large-scale, distributed data sets and
-in this respect surpasses the majority of existing multi-pass analytical OLS estimators or iterative optimization algorithms.
-
-The overall complexity of the implemented algorithm to estimate the regression coefficients is `O(N C² + C³)`, where
-`N` denotes the size of the training data set (the number of documents in the search result set) and `C` the number
-of the indicated explanatory variables (fields).
-
-## Examples
-...
 
 ## License
 Copyright 2017 Scaleborn UG (haftungsbeschränkt).
