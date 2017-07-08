@@ -11,7 +11,7 @@ variables `x = (x~1~, x~2~,...,x~C~)` (called explanatory variables) based on a 
 image:http://latex.codecogs.com/gif.latex?h(x)%20=%20\theta_{0}%20+%20\sum_{j=1}^C%20\theta_{j}%20x_{j}[]
 
 This plugin enhances Elasticsearch's query engine by two new aggregations, which utilize the index data during search
-for estimating a linear regression model in order to expose information like prediction of a value for the target variable,
+as training data for estimating a linear regression model in order to expose information like prediction of a value for the target variable,
 anomaly detection and measuring the accuracy or rather predictiveness of the model.
 Estimation is performed regarding the https://en.wikipedia.org/wiki/Ordinary_least_squares[OLS]
 (ordinary least-squares) approach over the search result set.
@@ -40,8 +40,8 @@ regarding the estimated model with respect to a set of given input values for th
                  of the linear hypothesis function ``h(x)``.
 
 Assuming the data consists of documents representing sold house prices with features
- like number of bedrooms, bathrooms and size etc. we can predict or validate
- the price for our house in Morro Bay with 2000 square feet, 4 bedrooms and 2 bathrooms.
+ like number of bedrooms, bathrooms and size etc. we can let predict or validate
+ the price for our house in Morro Bay with 2000 square feet, 4 bedrooms and 2 bathrooms by:
 
 [source,js]
 --------------------------------------------------
@@ -70,7 +70,7 @@ Assuming the data consists of documents representing sold house prices with feat
     have to be passed in array form in the order corresponding to the features listed in the `fields` attribute.
     The size of the `inputs` array is `C` equivalent to the number of the explanatory variables.
 
-And the following may be the response with the estimated price for our house:
+And the following may be the response with the estimated price of around $ 581,458 for our house:
 
 [source,js]
 --------------------------------------------------
@@ -166,7 +166,14 @@ Do not forget to restart the node after installing.
 |===
 
 ## Algorithm
-...
+This implementation is based on a new parallel, single-pass OLS estimation algorithm for multiple linear regression
+(not yet published). By aggregating
+over the data only once and in parallel the algorithm is ideally suited for large-scale, distributed data sets and
+in this respect surpasses the majority of existing multi-pass analytical OLS estimators or iterative optimization algorithms.
+
+The overall complexity of the implemented algorithm to estimate the regression coefficients is `O(N C² + C³)`, where
+`N` denotes the size of the training data set (the number of documents in the search result set) and `C` the number
+of the indicated explanatory variables (fields).
 
 ## Examples
 ...
