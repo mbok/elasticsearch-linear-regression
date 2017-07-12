@@ -176,7 +176,7 @@ To import the data into Elasticsearch we use logstash and this pipeline config
 https://github.com/scaleborn/elasticsearch-linear-regression/tree/master/examples/houseprices/house-prices-import.conf[house-prices-import.conf]:
 [source,js]
 --------------------------------------------------
-./bin/logstash -f house-prices.conf
+./bin/logstash -f house-prices-import.conf
 --------------------------------------------------
 The index data will have this form:
 [source,js]
