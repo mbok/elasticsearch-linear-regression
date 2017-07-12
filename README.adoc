@@ -150,7 +150,7 @@ Due to algorithmic constraints both aggregations result an empty response, if
 
 * the search result size is less or equal than the number of indicated explanatory variables,
 * values of the explanatory variables in the search result set is linearly dependent (that means
-  that a column can be written as a linear combination of the other columns)
+  that a column can be written as a linear combination of the other columns).
 
 
 ## Algorithm
@@ -164,8 +164,81 @@ The overall complexity of the implemented algorithm to estimate the regression c
 of the indicated explanatory variables (fields).
 
 ## Examples
-...
+### Predicting house prices
+The idea is very simple. We have data in our Elasticsearch index representing
+sold house prices in our region with some features like square footage of
+the house, # of bathrooms, # of bedrooms etc. Now we want to find out which
+price we have to pay for a house of our dreams.
 
+In this example we use test data from: http://wiki.csc.calpoly.edu/datasets/attachment/wiki/Houses/RealEstate.csv?format=raw
+
+To import the data into Elasticsearch we use logstash and this pipeline config
+https://github.com/scaleborn/elasticsearch-linear-regression/tree/master/examples/houseprices/house-prices-import.conf[house-prices-import.conf]:
+[source,js]
+--------------------------------------------------
+./bin/logstash -f house-prices.conf
+--------------------------------------------------
+The index data will have this form:
+[source,js]
+--------------------------------------------------
+{
+  "_index": "houses",
+  "_type": "prices",
+  "_id": "AV0zjVhTomRh2LZNgmfJ",
+  "_source": {
+      "bathrooms": 3,
+      "bedrooms": 4,
+      "size": 4168,
+      "mls": "140077",
+      "price": 1100000,
+      "location": "Morro Bay",
+      "price_sq_ft": 263.92,
+      "status": "Short Sale"
+  }
+}
+--------------------------------------------------
+
+We can now query the index for houses "Morro Bay" and let predict the price
+with respect to the features of our dream house, which should have 3 bedrooms,
+2 bathrooms and at least 2000 square feet:
+[source,js]
+--------------------------------------------------
+/houses/_search?size=0
+{
+    "query": {
+        "match" : {
+            "location" : "Morro Bay"
+        }
+    },
+    "aggs": {
+        "dream_house_price": {
+            "linreg_predict": {
+                "fields": ["size", "bedrooms", "bathrooms", "price"],
+                "inputs": [2000, 3, 2]
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+Regarding the following prediction response we have to expect about
+$ 650,000 to pay for the desired house in "Morro Bay".
+[source,js]
+--------------------------------------------------
+{
+    "aggregations": {
+        "dream_house_price": {
+            "value": 649918.0709489314,
+            "coefficients": [
+                249.02340193904183,
+                -68314.4830871133,
+                64248.05007337558
+            ],
+            "intercept": 228318.6161854365
+        }
+    }
+}
+--------------------------------------------------
 
 ## Installation
 
