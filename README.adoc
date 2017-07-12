@@ -178,7 +178,7 @@ https://github.com/scaleborn/elasticsearch-linear-regression/tree/master/example
 ./bin/logstash -f house-prices-import.conf
 ....
 
-The index data will have this form:
+The indexed data will have this form:
 [source,js]
 --------------------------------------------------
 {
@@ -198,8 +198,8 @@ The index data will have this form:
 }
 --------------------------------------------------
 
-We can now query the index for houses "Morro Bay" and let predict the price
-with respect to the features of our dream house, which should have 3 bedrooms,
+We can now query the index for houses in "Morro Bay" and let predict the price
+of our dream house with respect to the desired features like 3 bedrooms,
 2 bathrooms and at least 2000 square feet:
 [source,js]
 --------------------------------------------------
