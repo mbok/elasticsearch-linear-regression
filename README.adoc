@@ -163,6 +163,26 @@ The overall complexity of the implemented algorithm to estimate the regression c
 `N` denotes the size of the training data set (the number of documents in the search result set) and `C` the number
 of the indicated explanatory variables (fields).
 
+## Installation
+
+### Elasticsearch 5.x
+For installing this plugin please choose first the proper version under the compatible
+matrix which matches your Elasticsearch version and use the download link for the following command.
+
+[source]
+----
+./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip
+----
+The plugin will be installed under the name "linear-regression".
+Do not forget to restart the node after installing.
+
+.Compatibility matrix
+[frame="all"]
+|===
+| Plugin version | Elasticsearch version | Release date
+| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  1, 2017
+|===
+
 ## Examples
 ### Predicting house prices
 The idea is very simple. We have data in our Elasticsearch index representing
@@ -199,7 +219,7 @@ The indexed data will have this form:
 --------------------------------------------------
 
 We can now query the index for houses in "Morro Bay" and let predict the price
-of our dream house with respect to the desired features like 3 bedrooms,
+for our dream house with respect to the desired features like 3 bedrooms,
 2 bathrooms and at least 2000 square feet:
 [source,js]
 --------------------------------------------------
@@ -239,27 +259,6 @@ $ 650,000 to pay for the desired house in "Morro Bay".
     }
 }
 --------------------------------------------------
-
-## Installation
-
-### Elasticsearch 5.x
-For installing this plugin please choose first the proper version under the compatible
-matrix which matches your Elasticsearch version and use the download link for the following command.
-
-[source]
-----
-./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip
-----
-The plugin will be installed under the name "linear-regression".
-Do not forget to restart the node after installing.
-
-.Compatibility matrix
-[frame="all"]
-|===
-| Plugin version | Elasticsearch version | Release date
-| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  1, 2017
-|===
-
 
 ## License
 Copyright 2017 Scaleborn UG (haftungsbeschränkt).
