@@ -174,10 +174,10 @@ In this example we use test data from: http://wiki.csc.calpoly.edu/datasets/atta
 
 To import the data into Elasticsearch we use logstash and this pipeline config
 https://github.com/scaleborn/elasticsearch-linear-regression/tree/master/examples/houseprices/house-prices-import.conf[house-prices-import.conf]:
-[source,js]
---------------------------------------------------
+....
 ./bin/logstash -f house-prices-import.conf
---------------------------------------------------
+....
+
 The index data will have this form:
 [source,js]
 --------------------------------------------------
