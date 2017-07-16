@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.scaleborn.linereg.estimation;
 
 /**
  * Created by mbok on 17.03.17.
@@ -22,7 +22,7 @@ package org.scaleborn.linereg.evaluation;
 public class DerivationEquationBuilder {
 
   public DerivationEquation buildDerivationEquation(
-      SlopeCoefficientsSampling slopeCoefficientsSampling) {
+      final SlopeCoefficientsSampling slopeCoefficientsSampling) {
 
     return new DerivationEquation() {
       @Override

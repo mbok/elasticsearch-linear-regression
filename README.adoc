@@ -33,11 +33,9 @@ regarding the estimated model with respect to a set of given input values for th
 `value`:: The predicted value for the response variable computed using the estimated linear hypothesis
           function ``h(x)`` with `x` given by `C` input values for the explanatory variables
           `x = [x~1~, x~2~,...,x~C~]`.
-`coefficients`:: Estimated slope coefficients
-  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
+`coefficients`:: Estimated coefficients
+  image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
     of the linear linear hypothesis function ``h(x)``.
-`intercept`:: Estimated intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
-                 of the linear hypothesis function ``h(x)``.
 
 Assuming the data consists of documents representing sold house prices with features
  like number of bedrooms, bathrooms and size etc. we can let predict or validate
@@ -80,11 +78,11 @@ And the following may be the response with the estimated price of around $ 581,4
         "my_house_price": {
             "value": 581458.3087492324,
             "coefficients": [
+                227990.63952712028,
                 248.92285661317254,
                 -68297.7720278421,
                 64406.52205356777
-            ],
-            "intercept": 227990.63952712028
+            ]
         }
     }
 }
@@ -99,11 +97,9 @@ The `linreg_stats` aggregation computes statistics for the estimated linear regr
 `rss`:: Residual sum of squares as a measure of the discrepancy between the data and the estimated model.
         The lower the `rss` number, the smaller the error of the prediction, and the better the model.
 `mse`:: Mean squared error or rather `rss` divided by the number of documents consumed for model estimation.
-`coefficients`:: Slope coefficients
-  image:http://latex.codecogs.com/gif.latex?\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
+`coefficients`:: Estimated coefficients
+  image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
     of the linear linear hypothesis function ``h(x)``.
-`intercept`:: Intercept coefficient image:http://latex.codecogs.com/gif.latex?\theta_0%20[]
-                 of the linear hypothesis function ``h(x)``.
 
 Assuming the data consists of documents representing house prices we can compute statistics for
 the estimated best fitting linear hypothesis function which predicts house prices based on number of
@@ -135,11 +131,11 @@ and the last for the response variable. The above request returns the following 
             "rss": 49523788338938.734,
             "mse": 63410740510.80504,
             "coefficients": [
+                47553.18737564783,
                 -100544.0725894584,
                 45981.15827544966,
                 309.6013051477475
-            ],
-            "intercept": 47553.18737564783
+            ]
         }
     }
 }
@@ -180,7 +176,8 @@ Do not forget to restart the node after installing.
 [frame="all"]
 |===
 | Plugin version | Elasticsearch version | Release date
-| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  1, 2017
+| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.2.zip[5.3.0.2]        | 5.3.0 | Jul  16, 2017
+| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  30, 2017
 |===
 
 ## Examples
@@ -198,7 +195,7 @@ https://github.com/scaleborn/elasticsearch-linear-regression/tree/master/example
 ./bin/logstash -f house-prices-import.conf
 ....
 
-The indexed data will have this form:
+The indexed documents will have this form:
 [source,js]
 --------------------------------------------------
 {
@@ -250,15 +247,96 @@ $ 650,000 to pay for the desired house in "Morro Bay".
         "dream_house_price": {
             "value": 649918.0709489314,
             "coefficients": [
+                228318.6161854365,
                 249.02340193904183,
                 -68314.4830871133,
                 64248.05007337558
-            ],
-            "intercept": 228318.6161854365
+            ]
         }
     }
 }
 --------------------------------------------------
+
+By using sub aggregations we are able to find out the estimated prices per location:
+[source,js]
+--------------------------------------------------
+/houses/_search?size=0
+{
+    "aggs": {
+        "locations": {
+            "terms": {
+                "field": "location.keyword",
+                "size": 15
+            },
+            "aggs": {
+                "dream_house_price": {
+                    "linreg_predict": {
+                        "fields": ["size", "bedrooms", "bathrooms", "price"],
+                        "inputs": [2000, 3, 2]
+                    }
+                }
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+The response uncovers that "Arroyo Grande" would be
+the most expensive region for our dream house:
+
+[source,js]
+--------------------------------------------------
+{
+    "aggregations": {
+        "locations": {
+            "buckets": [
+                {
+                    "key": "Santa Maria-Orcutt",
+                    "doc_count": 265,
+                    "dream_house_price": {
+                        "value": 256251.9105297585,
+                        "coefficients": [
+                            26437.192829649313,
+                            81.19071633227178,
+                            6825.9128627023265,
+                            23477.773223729317
+                        ]
+                    }
+                },
+                {
+                    "key": "Paso Robles",
+                    "doc_count": 85,
+                    "dream_house_price": {
+                        "value": 365620.0386191703,
+                        "coefficients": [
+                            42958.257094706176,
+                            151.7000907380368,
+                            6486.477078139843,
+                            -98.91559301451247
+                        ]
+                    }
+                },
+                ...
+                {
+                    "key": " Arroyo Grande",
+                    "doc_count": 12,
+                    "dream_house_price": {
+                        "value": 1140196.791331573,
+                        "coefficients": [
+                            728566.7474390095,
+                            1956.6474540196602,
+                            -706891.620925945,
+                            -690495.0006844609
+                        ]
+                    }
+                }
+                ...
+            ]
+        }
+    }
+}
+--------------------------------------------------
+
 
 ## License
 Copyright 2017 Scaleborn UG (haftungsbeschränkt).

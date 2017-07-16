@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation.commons;
+package org.scaleborn.linereg.estimation.commons;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.CholeskyDecomposition;
 import org.apache.commons.math3.linear.DecompositionSolver;
+import org.apache.commons.math3.linear.NonPositiveDefiniteMatrixException;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.scaleborn.linereg.evaluation.DerivationEquation;
-import org.scaleborn.linereg.evaluation.DerivationEquationSolver;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients.DefaultSlopeCoefficients;
+import org.scaleborn.linereg.estimation.DerivationEquation;
+import org.scaleborn.linereg.estimation.DerivationEquationSolver;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients.DefaultSlopeCoefficients;
 
 /**
  * Solves the coefficient derivation equation using math-commons library and the Cholesky
@@ -34,16 +35,17 @@ import org.scaleborn.linereg.evaluation.SlopeCoefficients.DefaultSlopeCoefficien
 public class CommonsMathSolver implements DerivationEquationSolver {
 
   @Override
-  public SlopeCoefficients solveCoefficients(final DerivationEquation eq) {
-    double[][] sourceTriangleMatrix = eq.getCovarianceLowerTriangularMatrix();
+  public SlopeCoefficients estimateCoefficients(final DerivationEquation eq)
+      throws EstimationException {
+    final double[][] sourceTriangleMatrix = eq.getCovarianceLowerTriangularMatrix();
     // Copy matrix and enhance it to a full matrix as expected by CholeskyDecomposition
     // FIXME: Avoid copy job to speed-up the solving process e.g. by extending the CholeskyDecomposition constructor
-    int length = sourceTriangleMatrix.length;
-    double[][] matrix = new double[length][];
+    final int length = sourceTriangleMatrix.length;
+    final double[][] matrix = new double[length][];
     for (int i = 0; i < length; i++) {
       matrix[i] = new double[length];
-      double[] s = sourceTriangleMatrix[i];
-      double[] t = matrix[i];
+      final double[] s = sourceTriangleMatrix[i];
+      final double[] t = matrix[i];
       for (int j = 0; j <= i; j++) {
         t[j] = s[j];
       }
@@ -51,11 +53,15 @@ public class CommonsMathSolver implements DerivationEquationSolver {
         t[j] = sourceTriangleMatrix[j][i];
       }
     }
-    RealMatrix coefficients =
+    final RealMatrix coefficients =
         new Array2DRowRealMatrix(matrix, false);
-    DecompositionSolver solver = new CholeskyDecomposition(coefficients).getSolver();
-    RealVector constants = new ArrayRealVector(eq.getConstraints(), true);
-    final RealVector solution = solver.solve(constants);
-    return new DefaultSlopeCoefficients(solution.toArray());
+    try {
+      final DecompositionSolver solver = new CholeskyDecomposition(coefficients).getSolver();
+      final RealVector constants = new ArrayRealVector(eq.getConstraints(), true);
+      final RealVector solution = solver.solve(constants);
+      return new DefaultSlopeCoefficients(solution.toArray());
+    } catch (final NonPositiveDefiniteMatrixException e) {
+      throw new EstimationException("Matrix inversion error due to data is linearly dependent", e);
+    }
   }
 }

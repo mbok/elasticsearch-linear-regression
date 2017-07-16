@@ -16,7 +16,7 @@
 
 package org.scaleborn.linereg.calculation.intercept;
 
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 import org.scaleborn.linereg.sampling.Sampling.InterceptSampling;
 import org.scaleborn.linereg.sampling.Sampling.SamplingContext;
 

@@ -17,69 +17,52 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.support;
 
 import java.io.IOException;
+import java.util.Arrays;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients.DefaultSlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
 /**
  * Created by mbok on 07.04.17.
  */
 public class ModelResults implements Writeable, ToXContent {
 
-  private SlopeCoefficients slopeCoefficients;
-
-  private double intercept;
+  private final double[] coefficients;
 
   public ModelResults(final SlopeCoefficients slopeCoefficients, final double intercept) {
-    this.slopeCoefficients = slopeCoefficients;
-    this.intercept = intercept;
+    final int slopeLen = slopeCoefficients.getCoefficients().length;
+    this.coefficients = new double[slopeLen + 1];
+    System.arraycopy(slopeCoefficients.getCoefficients(), 0, this.coefficients, 1, slopeLen);
+    this.coefficients[0] = intercept;
   }
 
   public ModelResults(final StreamInput in) throws IOException {
-    this.slopeCoefficients = new DefaultSlopeCoefficients(in.readDoubleArray());
-    this.intercept = in.readDouble();
+    this.coefficients = in.readDoubleArray();
   }
 
   @Override
   public void writeTo(final StreamOutput out) throws IOException {
-    out.writeDoubleArray(this.slopeCoefficients.getCoefficients());
-    out.writeDouble(this.intercept);
+    out.writeDoubleArray(this.coefficients);
   }
 
-  public SlopeCoefficients getSlopeCoefficients() {
-    return this.slopeCoefficients;
+  public double[] getCoefficients() {
+    return this.coefficients;
   }
-
-  public void setSlopeCoefficients(final SlopeCoefficients slopeCoefficients) {
-    this.slopeCoefficients = slopeCoefficients;
-  }
-
-  public double getIntercept() {
-    return this.intercept;
-  }
-
-  public void setIntercept(final double intercept) {
-    this.intercept = intercept;
-  }
-
 
   @Override
   public String toString() {
     return "ModelResults{" +
-        "slopeCoefficients=" + this.slopeCoefficients +
-        ", intercept=" + this.intercept +
+        "coefficients=" + Arrays.toString(this.coefficients) +
         '}';
   }
 
   @Override
   public XContentBuilder toXContent(final XContentBuilder builder, final Params params)
       throws IOException {
-    builder.array("coefficients", this.getSlopeCoefficients().getCoefficients());
-    builder.field("intercept", this.getIntercept());
+    builder.array("coefficients", this.coefficients);
     return builder;
   }
 

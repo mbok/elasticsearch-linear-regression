@@ -23,7 +23,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.ModelResults;
 import org.scaleborn.linereg.calculation.statistics.Statistics;
 import org.scaleborn.linereg.calculation.statistics.Statistics.DefaultStatistics;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
 /**
  * Created by mbok on 07.04.17.

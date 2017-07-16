@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.scaleborn.linereg.estimation;
 
 /**
  * Represents the derivation equation (divided by 2) build up from the sampled data.

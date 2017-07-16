@@ -25,7 +25,7 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseInternalAggregation;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
 /**
  * Created by mbok on 11.04.17.

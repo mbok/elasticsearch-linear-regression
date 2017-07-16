@@ -25,10 +25,11 @@ import org.scaleborn.linereg.calculation.statistics.Statistics.DefaultStatistics
 import org.scaleborn.linereg.calculation.statistics.StatsModel;
 import org.scaleborn.linereg.calculation.statistics.StatsSampling;
 import org.scaleborn.linereg.calculation.statistics.StatsSampling.StatsSamplingProxy;
-import org.scaleborn.linereg.evaluation.DerivationEquation;
-import org.scaleborn.linereg.evaluation.DerivationEquationBuilder;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
-import org.scaleborn.linereg.evaluation.commons.CommonsMathSolver;
+import org.scaleborn.linereg.estimation.DerivationEquation;
+import org.scaleborn.linereg.estimation.DerivationEquationBuilder;
+import org.scaleborn.linereg.estimation.DerivationEquationSolver.EstimationException;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.commons.CommonsMathSolver;
 import org.scaleborn.linereg.sampling.exact.ExactModelSamplingFactory;
 import org.scaleborn.linereg.sampling.exact.ExactSamplingContext;
 
@@ -105,8 +106,8 @@ public class TestModels {
       return this.equation;
     }
 
-    public StatsModel evaluateModel() {
-      final SlopeCoefficients coefficients = new CommonsMathSolver().solveCoefficients(
+    public StatsModel evaluateModel() throws EstimationException {
+      final SlopeCoefficients coefficients = new CommonsMathSolver().estimateCoefficients(
           this.equation);
       return new StatsModel(this.statsSampling, coefficients);
     }

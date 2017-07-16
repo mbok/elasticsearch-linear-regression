@@ -20,6 +20,7 @@ import org.elasticsearch.test.ESTestCase;
 import org.junit.Test;
 import org.scaleborn.linereg.TestModels;
 import org.scaleborn.linereg.TestModels.TestModel;
+import org.scaleborn.linereg.estimation.DerivationEquationSolver.EstimationException;
 
 /**
  * Tests for {@link StatsCalculator}.
@@ -28,14 +29,14 @@ import org.scaleborn.linereg.TestModels.TestModel;
 public class StatsBuilderTests extends ESTestCase {
 
   @Test
-  public void testStats() {
+  public void testStats() throws EstimationException {
     testStatsForModel(TestModels.SIMPLE_MODEL_1);
     testStatsForModel(TestModels.MULTI_FEATURES_2_MODEL_1);
     testStatsForModel(TestModels.MULTI_FEATURES_3_MODEL_1);
     testStatsForModel(TestModels.MULTI_FEATURES_6_LONGLEY);
   }
 
-  private void testStatsForModel(final TestModel testModel) {
+  private void testStatsForModel(final TestModel testModel) throws EstimationException {
     final StatsModel linearModel = testModel.evaluateModel();
     final Statistics statistics = new StatsCalculator().calculate(linearModel);
     testModel.assertStatistics(statistics);

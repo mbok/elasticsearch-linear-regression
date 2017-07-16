@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.scaleborn.linereg.estimation;
 
 import java.io.IOException;
 import org.scaleborn.linereg.sampling.Sampling.CoefficientLinearTermSampling;

@@ -30,11 +30,12 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.aggregations.InternalAggregation;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.scaleborn.linereg.calculation.intercept.InterceptCalculator;
-import org.scaleborn.linereg.evaluation.DerivationEquation;
-import org.scaleborn.linereg.evaluation.DerivationEquationBuilder;
-import org.scaleborn.linereg.evaluation.DerivationEquationSolver;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
-import org.scaleborn.linereg.evaluation.commons.CommonsMathSolver;
+import org.scaleborn.linereg.estimation.DerivationEquation;
+import org.scaleborn.linereg.estimation.DerivationEquationBuilder;
+import org.scaleborn.linereg.estimation.DerivationEquationSolver;
+import org.scaleborn.linereg.estimation.DerivationEquationSolver.EstimationException;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.commons.CommonsMathSolver;
 
 /**
  * Created by mbok on 07.04.17.
@@ -142,9 +143,7 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
 
     // return empty result if all samples are null
     if (aggs.isEmpty()) {
-      return buildInternalAggregation(this.name, this.featuresCount, null, null,
-          pipelineAggregators(),
-          getMetaData());
+      return buildEmptyInternalAggregation();
     }
 
     final S composedSampling = buildSampling(this.featuresCount);
@@ -154,12 +153,32 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
       composedSampling.merge((S) ((BaseInternalAggregation) aggs.get(i)).sampling);
     }
 
-    final M evaluatedResults = evaluateResults(composedSampling);
+    if (composedSampling.getCount() <= composedSampling.getFeaturesCount()) {
+      LOGGER.debug(
+          "Insufficient amount of training data for model estimation, at least {} are required, given {}",
+          composedSampling.getFeaturesCount() + 1, composedSampling.getCount());
+      return buildEmptyInternalAggregation();
+    }
+
+    M evaluatedResults = null;
+    try {
+      evaluatedResults = evaluateResults(composedSampling);
+    } catch (final EstimationException e) {
+      LOGGER.debug(
+          "Failed to estimate model", e);
+      return buildEmptyInternalAggregation();
+    }
 
     LOGGER.debug("Evaluated results: {}", evaluatedResults);
     return buildInternalAggregation(this.name, this.featuresCount, composedSampling,
         evaluatedResults,
         pipelineAggregators(), getMetaData());
+  }
+
+  private InternalAggregation buildEmptyInternalAggregation() {
+    return buildInternalAggregation(this.name, this.featuresCount, null, null,
+        pipelineAggregators(),
+        getMetaData());
   }
 
   protected abstract A buildInternalAggregation(final String name, final int featuresCount,
@@ -171,12 +190,12 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
       double intercept);
 
 
-  private M evaluateResults(final S composedSampling) {
-    // Linear regression evaluation
+  private M evaluateResults(final S composedSampling) throws EstimationException {
+    // Linear regression estimation
     final DerivationEquation derivationEquation = derivationEquationBuilder
         .buildDerivationEquation(composedSampling);
     final SlopeCoefficients slopeCoefficients = derivationEquationSolver
-        .solveCoefficients(derivationEquation);
+        .estimateCoefficients(derivationEquation);
     final M buildResults = buildResults(composedSampling, slopeCoefficients,
         interceptCalculator.calculate(slopeCoefficients, composedSampling, composedSampling));
     return buildResults;

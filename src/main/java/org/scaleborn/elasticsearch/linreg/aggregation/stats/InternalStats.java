@@ -27,7 +27,7 @@ import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseInternalAggreg
 import org.scaleborn.linereg.calculation.statistics.Statistics;
 import org.scaleborn.linereg.calculation.statistics.StatsCalculator;
 import org.scaleborn.linereg.calculation.statistics.StatsModel;
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
 /**
  * Created by mbok on 21.03.17.

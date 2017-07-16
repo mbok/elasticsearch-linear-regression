@@ -17,7 +17,7 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.support;
 
 import java.io.IOException;
-import org.scaleborn.linereg.evaluation.SlopeCoefficientsSampling.SlopeCoefficientsSamplingProxy;
+import org.scaleborn.linereg.estimation.SlopeCoefficientsSampling.SlopeCoefficientsSamplingProxy;
 import org.scaleborn.linereg.sampling.Sampling.InterceptSampling;
 import org.scaleborn.linereg.sampling.io.StateInputStream;
 import org.scaleborn.linereg.sampling.io.StateOutputStream;

@@ -16,7 +16,7 @@
 
 package org.scaleborn.linereg.calculation.statistics;
 
-import org.scaleborn.linereg.evaluation.SlopeCoefficients;
+import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
 /**
  * Bean for evaluated linear model fitting best the sampled data regarding

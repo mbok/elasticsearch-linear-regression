@@ -17,7 +17,7 @@
 package org.scaleborn.linereg.calculation.statistics;
 
 import java.io.IOException;
-import org.scaleborn.linereg.evaluation.SlopeCoefficientsSampling;
+import org.scaleborn.linereg.estimation.SlopeCoefficientsSampling;
 import org.scaleborn.linereg.sampling.Sampling.ResponseVarianceTermSampling;
 import org.scaleborn.linereg.sampling.io.StateInputStream;
 import org.scaleborn.linereg.sampling.io.StateOutputStream;

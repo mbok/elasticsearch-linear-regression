@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.scaleborn.linereg.evaluation;
+package org.scaleborn.linereg.estimation;
 
 import java.util.Arrays;
 
@@ -35,13 +35,13 @@ public interface SlopeCoefficients {
 
     @Override
     public double[] getCoefficients() {
-      return coefficients;
+      return this.coefficients;
     }
 
     @Override
     public String toString() {
       return "DefaultSlopeCoefficients{" +
-          "coefficients=" + Arrays.toString(coefficients) +
+          "coefficients=" + Arrays.toString(this.coefficients) +
           '}';
     }
   }
