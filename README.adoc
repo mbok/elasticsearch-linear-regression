@@ -167,7 +167,7 @@ matrix which matches your Elasticsearch version and use the download link for th
 
 [source]
 ----
-./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.2/elasticsearch-linear-regression-5.3.0.2.zip
+./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.0.1/elasticsearch-linear-regression-5.5.0.1.zip
 ----
 The plugin will be installed under the name "linear-regression".
 Do not forget to restart the node after installing.
