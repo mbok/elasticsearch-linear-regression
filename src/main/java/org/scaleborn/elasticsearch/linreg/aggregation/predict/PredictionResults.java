@@ -20,7 +20,7 @@ import java.io.IOException;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.search.aggregations.InternalAggregation.CommonFields;
+import org.elasticsearch.search.aggregations.Aggregation.CommonFields;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.ModelResults;
 import org.scaleborn.linereg.estimation.SlopeCoefficients;
 
@@ -52,7 +52,7 @@ public class PredictionResults extends ModelResults {
   @Override
   public XContentBuilder toXContent(final XContentBuilder builder, final Params params)
       throws IOException {
-    builder.field(CommonFields.VALUE, this.predictedValue);
+    builder.field(CommonFields.VALUE.toString(), this.predictedValue);
     return super.toXContent(builder, params);
   }
 
