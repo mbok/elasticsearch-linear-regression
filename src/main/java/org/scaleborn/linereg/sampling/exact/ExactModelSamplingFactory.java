@@ -53,8 +53,9 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
 
     @Override
     public double getResponseVariance() {
-      return this.context.responseSquareSum
-          - this.context.responseSum / this.context.getCount() * this.context.responseSum;
+      return (this.context.responseSquareSum
+          - this.context.responseSum / this.context.getCount() * this.context.responseSum)
+          / this.context.getCount();
     }
 
     @Override
@@ -106,10 +107,10 @@ public class ExactModelSamplingFactory implements ModelSamplingFactory<ExactSamp
       final double[] featuresMean = this.context.getFeaturesMean();
       final double responseMean = this.context.getResponseMean();
       for (int i = 0; i < featuresCount; i++) {
-        covariance[i] =
+        covariance[i] = (
             this.context.featuresResponseProductSum[i] - featuresMean[i] * this.context.responseSum
                 - responseMean * this.context.featureSums[i]
-                + count * featuresMean[i] * responseMean;
+                + count * featuresMean[i] * responseMean) / count;
       }
       return covariance;
     }

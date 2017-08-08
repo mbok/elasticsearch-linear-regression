@@ -30,40 +30,40 @@ public class StatsCalculator {
     final double[] slopeCoefficients = model.getSlopeCoefficients().getCoefficients();
 
     final double responseVariance = model.getStatsSampling().getResponseVariance();
-    double squaredError = responseVariance;
+    double squaredMeanError = responseVariance;
 
     for (int i = 0; i < featuresCount; i++) {
       final double c = slopeCoefficients[i];
       final double c2 = c * c;
       // Minus double of feature response coefficient
-      squaredError -= 2 * featuresResponseCovariance[i] * c;
+      squaredMeanError -= 2 * featuresResponseCovariance[i] * c;
 
       // Add values from covariance matrix of the derivation matrix
       for (int j = 0; j <= i; j++) {
         if (i == j) {
           // Variance term
-          squaredError += c2 * covarianceLowerTriangularMatrix[i][j];
+          squaredMeanError += c2 * covarianceLowerTriangularMatrix[i][j];
         } else {
           // Covariance term
-          squaredError += 2 * c * slopeCoefficients[j] * covarianceLowerTriangularMatrix[i][j];
+          squaredMeanError += 2 * c * slopeCoefficients[j] * covarianceLowerTriangularMatrix[i][j];
         }
       }
     }
-    final double rss = squaredError;
+    final double mse = squaredMeanError;
     return new Statistics() {
       @Override
       public double getRss() {
-        return rss;
+        return mse * model.getStatsSampling().getCount();
       }
 
       @Override
       public double getMse() {
-        return rss / model.getStatsSampling().getCount();
+        return mse;
       }
 
       @Override
       public double getR2() {
-        return 1 - (rss / responseVariance);
+        return 1 - (getRss() / (responseVariance * model.getStatsSampling().getCount()));
       }
     };
   }

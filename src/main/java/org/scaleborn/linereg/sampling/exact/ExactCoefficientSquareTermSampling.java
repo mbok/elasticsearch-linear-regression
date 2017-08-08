@@ -36,11 +36,11 @@ public class ExactCoefficientSquareTermSampling implements
    * instability as well as to arithmetic overflow.
    */
   private double[][] featuresProductSums;
-  private ExactSamplingContext context;
+  private final ExactSamplingContext context;
 
-  public ExactCoefficientSquareTermSampling(ExactSamplingContext context) {
+  public ExactCoefficientSquareTermSampling(final ExactSamplingContext context) {
     this.context = context;
-    int featuresCount = context.getFeaturesCount();
+    final int featuresCount = context.getFeaturesCount();
     this.featuresProductSums = new double[featuresCount][];
     for (int i = 0; i < featuresCount; i++) {
       this.featuresProductSums[i] = new double[featuresCount];
@@ -49,21 +49,21 @@ public class ExactCoefficientSquareTermSampling implements
 
   @Override
   public double[][] getCovarianceLowerTriangularMatrix() {
-    int featuresCount = this.context.getFeaturesCount();
-    long count = this.context.getCount();
-    double[][] covMatrix = new double[featuresCount][];
-    double[] averages = this.context.getFeaturesMean();
-    double[] featureSums = this.context.featureSums;
+    final int featuresCount = this.context.getFeaturesCount();
+    final long count = this.context.getCount();
+    final double[][] covMatrix = new double[featuresCount][];
+    final double[] averages = this.context.getFeaturesMean();
+    final double[] featureSums = this.context.featureSums;
     for (int i = 0; i < featuresCount; i++) {
-      double avgI = averages[i];
+      final double avgI = averages[i];
       covMatrix[i] = new double[featuresCount];
       // Iterate until "i" due to the covariance matrix is symmetric and
       // build only the lower triangle
       for (int j = 0; j <= i; j++) {
-        double avgJ = averages[j];
-        covMatrix[i][j] =
+        final double avgJ = averages[j];
+        covMatrix[i][j] = (
             this.featuresProductSums[i][j] - avgI * featureSums[j] - avgJ * featureSums[i]
-                + count * avgI * avgJ;
+                + count * avgI * avgJ) / count;
       }
     }
     return covMatrix;
@@ -71,9 +71,9 @@ public class ExactCoefficientSquareTermSampling implements
 
   @Override
   public void sample(final double[] featureValues, final double responseValue) {
-    int featuresCount = this.context.getFeaturesCount();
+    final int featuresCount = this.context.getFeaturesCount();
     for (int i = 0; i < featuresCount; i++) {
-      double vi = featureValues[i];
+      final double vi = featureValues[i];
       for (int j = 0; j < featuresCount; j++) {
         this.featuresProductSums[i][j] += vi * featureValues[j];
       }
@@ -82,7 +82,7 @@ public class ExactCoefficientSquareTermSampling implements
 
   @Override
   public void merge(final ExactCoefficientSquareTermSampling fromSample) {
-    int featuresCount = this.context.getFeaturesCount();
+    final int featuresCount = this.context.getFeaturesCount();
     for (int i = 0; i < featuresCount; i++) {
       for (int j = 0; j < featuresCount; j++) {
         this.featuresProductSums[i][j] += fromSample.featuresProductSums[i][j];
