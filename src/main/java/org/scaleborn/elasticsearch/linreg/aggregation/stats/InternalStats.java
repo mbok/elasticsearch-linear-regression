@@ -85,12 +85,22 @@ public class InternalStats extends
   }
 
   @Override
+  public double getR2() {
+    if (this.results == null) {
+      return Double.NaN;
+    }
+    return this.results.statistics.getR2();
+  }
+
+  @Override
   public Object getDoProperty(final String element) {
     switch (element) {
       case "rss":
         return getRss();
       case "mse":
         return getMse();
+      case "r2":
+        return getR2();
     }
     return null;
   }

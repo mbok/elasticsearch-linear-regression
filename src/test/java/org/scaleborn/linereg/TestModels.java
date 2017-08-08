@@ -124,6 +124,7 @@ public class TestModels {
     public void assertStatistics(final Statistics statistics) {
       assertEquals("RSS not equal", this.expectedStatistics.getRss(), statistics.getRss(), 0.0001d);
       assertEquals("MSE not equal", this.expectedStatistics.getMse(), statistics.getMse(), 0.0001d);
+      assertEquals("R² not equal", this.expectedStatistics.getR2(), statistics.getR2(), 0.0001d);
     }
   }
 
@@ -141,7 +142,7 @@ public class TestModels {
        * Residual Sum of Squares: rss = 5.459016393
        * Coefficient of Determination: R2 = 0.787704918
        */
-      new DefaultStatistics(5.459016393, 5.459016393 / 7));
+      new DefaultStatistics(5.459016393, 5.459016393 / 7, 0.787704918));
 
   public static TestModel MULTI_FEATURES_2_MODEL_1 = new TestModel(3, 2, new double[][]{
       new double[]{-2, 3, 5},
@@ -157,7 +158,7 @@ public class TestModels {
        * Coefficient of Determination: R2 = 8.835223808·10-1
       */
   }, new double[]{-0.5496314882d, 0.3070409283d},
-      new DefaultStatistics(2.99513878d, 2.99513878d / 7));
+      new DefaultStatistics(2.99513878d, 2.99513878d / 7, 0.8835223808));
 
   public static TestModel MULTI_FEATURES_3_MODEL_1 = new TestModel(4, 3, new double[][]{
       new double[]{4, -2, 3, 5},
@@ -173,7 +174,7 @@ public class TestModels {
        * Coefficient of Determination: R2 = 8.947697777·10-1
       */
   }, new double[]{-0.03116979852d, -0.6272993725d, 0.3079647314d},
-      new DefaultStatistics(2.705920002d, 2.705920002d / 7));
+      new DefaultStatistics(2.705920002d, 2.705920002d / 7, 0.8947697777));
 
   /**
    * Reference data set Longley: from http://www.itl.nist.gov/div898/strd/lls/data/Longley.shtml
@@ -211,6 +212,6 @@ public class TestModels {
        */
       , new double[]{15.0618722713733d, -0.358191792925910E-01d, -2.02022980381683d,
       -1.03322686717359d, -0.511041056535807E-01d, 1829.15146461355d},
-      new DefaultStatistics(836424.055505915d, 836424.055505915d / 16));
+      new DefaultStatistics(836424.055505915d, 836424.055505915d / 16, 0.995479004577296));
 
 }

@@ -29,7 +29,8 @@ public class StatsCalculator {
         .getCovarianceLowerTriangularMatrix();
     final double[] slopeCoefficients = model.getSlopeCoefficients().getCoefficients();
 
-    double squaredError = model.getStatsSampling().getResponseVariance();
+    final double responseVariance = model.getStatsSampling().getResponseVariance();
+    double squaredError = responseVariance;
 
     for (int i = 0; i < featuresCount; i++) {
       final double c = slopeCoefficients[i];
@@ -58,6 +59,11 @@ public class StatsCalculator {
       @Override
       public double getMse() {
         return rss / model.getStatsSampling().getCount();
+      }
+
+      @Override
+      public double getR2() {
+        return 1 - (rss / responseVariance);
       }
     };
   }

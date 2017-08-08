@@ -34,6 +34,7 @@ public class StatsResults extends ModelResults {
 
     public static final String RSS = "rss";
     public static final String MSE = "mse";
+    public static final String R2 = "r2";
   }
 
   final Statistics statistics;
@@ -46,7 +47,7 @@ public class StatsResults extends ModelResults {
 
   public StatsResults(final StreamInput in) throws IOException {
     super(in);
-    this.statistics = new DefaultStatistics(in.readDouble(), in.readDouble());
+    this.statistics = new DefaultStatistics(in.readDouble(), in.readDouble(), in.readDouble());
   }
 
   @Override
@@ -54,6 +55,7 @@ public class StatsResults extends ModelResults {
     super.writeTo(out);
     out.writeDouble(this.statistics.getRss());
     out.writeDouble(this.statistics.getMse());
+    out.writeDouble(this.statistics.getR2());
   }
 
   @Override
@@ -63,6 +65,8 @@ public class StatsResults extends ModelResults {
     builder.field(Fields.RSS, this.statistics.getRss());
     // MSE
     builder.field(Fields.MSE, this.statistics.getMse());
+    // R2
+    builder.field(Fields.R2, this.statistics.getR2());
     return super.toXContent(builder, params);
   }
 

@@ -34,16 +34,23 @@ public interface Statistics {
   double getMse();
 
   /**
+   * @return R², coefficient of determination
+   */
+  double getR2();
+
+  /**
    * Default statistics bean.
    */
   public class DefaultStatistics implements Statistics {
 
     private final double rss;
     private final double mse;
+    private final double r2;
 
-    public DefaultStatistics(final double rss, final double mse) {
+    public DefaultStatistics(final double rss, final double mse, final double r2) {
       this.rss = rss;
       this.mse = mse;
+      this.r2 = r2;
     }
 
     @Override
@@ -57,10 +64,16 @@ public interface Statistics {
     }
 
     @Override
+    public double getR2() {
+      return this.r2;
+    }
+
+    @Override
     public String toString() {
       return "DefaultStatistics{" +
           "rss=" + this.rss +
           ", mse=" + this.mse +
+          ", r2=" + this.r2 +
           '}';
     }
   }
