@@ -180,7 +180,7 @@ Do not forget to restart the node after installing.
 [frame="all"]
 |===
 | Plugin version | Elasticsearch version | Release date
-| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.2.1/elasticsearch-linear-regression-5.5.2.1.zip[5.5.2.1]        | 5.5.2 | Aug  30, 2017
+| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.2.1/elasticsearch-linear-regression-5.5.2.1.zip[5.5.2.1]        | 5.5.2 | Aug  29, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.2/elasticsearch-linear-regression-5.5.1.2.zip[5.5.1.2]        | 5.5.1 | Aug  29, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.1/elasticsearch-linear-regression-5.5.1.1.zip[5.5.1.1]        | 5.5.1 | Jul  27, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.0.1/elasticsearch-linear-regression-5.5.0.1.zip[5.5.0.1]        | 5.5.0 | Jul  18, 2017
