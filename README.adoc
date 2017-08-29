@@ -97,6 +97,9 @@ The `linreg_stats` aggregation computes statistics for the estimated linear regr
 `rss`:: Residual sum of squares as a measure of the discrepancy between the data and the estimated model.
         The lower the `rss` number, the smaller the error of the prediction, and the better the model.
 `mse`:: Mean squared error or rather `rss` divided by the number of documents consumed for model estimation.
+`r2`:: Coefficient of determination, denoted R², as a statistical measure of how well the regression model
+        approximates the real data points. R² ranges from 0 to 1, where 1 indicates that the estimated hypothesis function perfectly fits the data.
+        (Available since 5.5.1.2)
 `coefficients`:: Estimated coefficients
   image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,%20\theta_3,.%20.%20.,%20\theta_C%20[]
     of the linear linear hypothesis function ``h(x)``.
@@ -128,13 +131,14 @@ and the last for the response variable. The above request returns the following 
     ...
     "aggregations": {
         "house_prices": {
-            "rss": 49523788338938.734,
-            "mse": 63410740510.80504,
+            "rss": 49523788338938.75,
+            "mse": 63410740510.80505,
+            "r2": 0.4788369924642064,
             "coefficients": [
-                47553.18737564783,
-                -100544.0725894584,
-                45981.15827544966,
-                309.6013051477475
+                47553.1873756476,
+                -100544.07258945837,
+                45981.15827544975,
+                309.6013051477474
             ]
         }
     }
@@ -167,7 +171,7 @@ matrix which matches your Elasticsearch version and use the download link for th
 
 [source]
 ----
-./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.1/elasticsearch-linear-regression-5.5.1.1.zip
+./bin/elasticsearch-plugin install https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.2/elasticsearch-linear-regression-5.5.1.2.zip
 ----
 The plugin will be installed under the name "linear-regression".
 Do not forget to restart the node after installing.
@@ -176,6 +180,7 @@ Do not forget to restart the node after installing.
 [frame="all"]
 |===
 | Plugin version | Elasticsearch version | Release date
+| https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.2/elasticsearch-linear-regression-5.5.1.2.zip[5.5.1.2]        | 5.5.1 | Aug  29, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.1.1/elasticsearch-linear-regression-5.5.1.1.zip[5.5.1.1]        | 5.5.1 | Jul  27, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.5.0.1/elasticsearch-linear-regression-5.5.0.1.zip[5.5.0.1]        | 5.5.0 | Jul  18, 2017
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.2/elasticsearch-linear-regression-5.3.0.2.zip[5.3.0.2]        | 5.3.0 | Jul  16, 2017
