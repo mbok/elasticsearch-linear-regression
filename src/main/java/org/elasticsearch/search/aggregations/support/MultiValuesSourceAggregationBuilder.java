@@ -50,7 +50,8 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   public abstract static class LeafOnly<VS extends ValuesSource, AB extends MultiValuesSourceAggregationBuilder<VS, AB>>
       extends MultiValuesSourceAggregationBuilder<VS, AB> {
 
-    protected LeafOnly(String name, ValuesSourceType valuesSourceType, ValueType targetValueType) {
+    protected LeafOnly(final String name, final ValuesSourceType valuesSourceType,
+        final ValueType targetValueType) {
       super(name, valuesSourceType, targetValueType);
     }
 
@@ -58,7 +59,9 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
      * Read from a stream that does not serialize its targetValueType. This should be used by most
      * subclasses.
      */
-    protected LeafOnly(StreamInput in, ValuesSourceType valuesSourceType, ValueType targetValueType)
+    protected LeafOnly(
+        final StreamInput in, final ValuesSourceType valuesSourceType,
+        final ValueType targetValueType)
         throws IOException {
       super(in, valuesSourceType, targetValueType);
     }
@@ -67,13 +70,14 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
      * Read an aggregation from a stream that serializes its targetValueType. This should only be
      * used by subclasses that override {@link #serializeTargetValueType()} to return true.
      */
-    protected LeafOnly(StreamInput in, ValuesSourceType valuesSourceType) throws IOException {
+    protected LeafOnly(final StreamInput in, final ValuesSourceType valuesSourceType)
+        throws IOException {
       super(in, valuesSourceType);
     }
 
     @Override
-    public AB subAggregations(Builder subFactories) {
-      throw new AggregationInitializationException("Aggregator [" + name + "] of type [" +
+    public AB subAggregations(final Builder subFactories) {
+      throw new AggregationInitializationException("Aggregator [" + this.name + "] of modifier [" +
           getType() + "] cannot accept sub-aggregations");
     }
   }
@@ -83,11 +87,12 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   private List<String> fields = Collections.emptyList();
   private ValueType valueType = null;
   private String format = null;
-  private Object missing = null;
+  private final Object missing = null;
   private Map<String, Object> missingMap = Collections.emptyMap();
 
-  protected MultiValuesSourceAggregationBuilder(String name, ValuesSourceType valuesSourceType,
-      ValueType targetValueType) {
+  protected MultiValuesSourceAggregationBuilder(final String name,
+      final ValuesSourceType valuesSourceType,
+      final ValueType targetValueType) {
     super(name);
     if (valuesSourceType == null) {
       throw new IllegalArgumentException("[valuesSourceType] must not be null: [" + name + "]");
@@ -96,8 +101,9 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
     this.targetValueType = targetValueType;
   }
 
-  protected MultiValuesSourceAggregationBuilder(StreamInput in, ValuesSourceType valuesSourceType,
-      ValueType targetValueType)
+  protected MultiValuesSourceAggregationBuilder(final StreamInput in,
+      final ValuesSourceType valuesSourceType,
+      final ValueType targetValueType)
       throws IOException {
     super(in);
     assert false
@@ -107,7 +113,8 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
     read(in);
   }
 
-  protected MultiValuesSourceAggregationBuilder(StreamInput in, ValuesSourceType valuesSourceType)
+  protected MultiValuesSourceAggregationBuilder(final StreamInput in,
+      final ValuesSourceType valuesSourceType)
       throws IOException {
     super(in);
     assert serializeTargetValueType() : "Wrong read constructor called for subclass that serializes its targetValueType";
@@ -120,22 +127,22 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * Read from a stream.
    */
   @SuppressWarnings("unchecked")
-  private void read(StreamInput in) throws IOException {
-    fields = (ArrayList<String>) in.readGenericValue();
-    valueType = in.readOptionalWriteable(ValueType::readFromStream);
-    format = in.readOptionalString();
-    missingMap = in.readMap();
+  private void read(final StreamInput in) throws IOException {
+    this.fields = (ArrayList<String>) in.readGenericValue();
+    this.valueType = in.readOptionalWriteable(ValueType::readFromStream);
+    this.format = in.readOptionalString();
+    this.missingMap = in.readMap();
   }
 
   @Override
-  protected final void doWriteTo(StreamOutput out) throws IOException {
+  protected final void doWriteTo(final StreamOutput out) throws IOException {
     if (serializeTargetValueType()) {
-      out.writeOptionalWriteable(targetValueType);
+      out.writeOptionalWriteable(this.targetValueType);
     }
-    out.writeGenericValue(fields);
-    out.writeOptionalWriteable(valueType);
-    out.writeOptionalString(format);
-    out.writeMap(missingMap);
+    out.writeGenericValue(this.fields);
+    out.writeOptionalWriteable(this.valueType);
+    out.writeOptionalString(this.format);
+    out.writeMap(this.missingMap);
     innerWriteTo(out);
   }
 
@@ -148,9 +155,9 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * Sets the field to use for this aggregation.
    */
   @SuppressWarnings("unchecked")
-  public AB fields(List<String> fields) {
+  public AB fields(final List<String> fields) {
     if (fields == null) {
-      throw new IllegalArgumentException("[field] must not be null: [" + name + "]");
+      throw new IllegalArgumentException("[field] must not be null: [" + this.name + "]");
     }
     this.fields = fields;
     return (AB) this;
@@ -160,16 +167,16 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * Gets the field to use for this aggregation.
    */
   public List<String> fields() {
-    return fields;
+    return this.fields;
   }
 
   /**
    * Sets the {@link ValueType} for the value produced by this aggregation
    */
   @SuppressWarnings("unchecked")
-  public AB valueType(ValueType valueType) {
+  public AB valueType(final ValueType valueType) {
     if (valueType == null) {
-      throw new IllegalArgumentException("[valueType] must not be null: [" + name + "]");
+      throw new IllegalArgumentException("[valueType] must not be null: [" + this.name + "]");
     }
     this.valueType = valueType;
     return (AB) this;
@@ -179,16 +186,16 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * Gets the {@link ValueType} for the value produced by this aggregation
    */
   public ValueType valueType() {
-    return valueType;
+    return this.valueType;
   }
 
   /**
    * Sets the format to use for the output of the aggregation.
    */
   @SuppressWarnings("unchecked")
-  public AB format(String format) {
+  public AB format(final String format) {
     if (format == null) {
-      throw new IllegalArgumentException("[format] must not be null: [" + name + "]");
+      throw new IllegalArgumentException("[format] must not be null: [" + this.name + "]");
     }
     this.format = format;
     return (AB) this;
@@ -198,7 +205,7 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * Gets the format to use for the output of the aggregation.
    */
   public String format() {
-    return format;
+    return this.format;
   }
 
   /**
@@ -206,9 +213,9 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * document
    */
   @SuppressWarnings("unchecked")
-  public AB missingMap(Map<String, Object> missingMap) {
+  public AB missingMap(final Map<String, Object> missingMap) {
     if (missingMap == null) {
-      throw new IllegalArgumentException("[missing] must not be null: [" + name + "]");
+      throw new IllegalArgumentException("[missing] must not be null: [" + this.name + "]");
     }
     this.missingMap = missingMap;
     return (AB) this;
@@ -219,24 +226,24 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
    * document
    */
   public Map<String, Object> missingMap() {
-    return missingMap;
+    return this.missingMap;
   }
 
   @Override
-  protected final MultiValuesSourceAggregatorFactory<VS, ?> doBuild(SearchContext context,
-      AggregatorFactory<?> parent,
-      AggregatorFactories.Builder subFactoriesBuilder) throws IOException {
-    List<NamedValuesSourceConfigSpec<VS>> configs = resolveConfig(context);
-    MultiValuesSourceAggregatorFactory<VS, ?> factory = innerBuild(context, configs, parent,
+  protected final MultiValuesSourceAggregatorFactory<VS, ?> doBuild(final SearchContext context,
+      final AggregatorFactory<?> parent,
+      final AggregatorFactories.Builder subFactoriesBuilder) throws IOException {
+    final List<NamedValuesSourceConfigSpec<VS>> configs = resolveConfig(context);
+    final MultiValuesSourceAggregatorFactory<VS, ?> factory = innerBuild(context, configs, parent,
         subFactoriesBuilder);
     return factory;
   }
 
-  protected List<NamedValuesSourceConfigSpec<VS>> resolveConfig(SearchContext context) {
-    List<NamedValuesSourceConfigSpec<VS>> configs = new ArrayList<>(fields.size());
-    for (String field : fields) {
-      ValuesSourceConfig<VS> config = config(context, field, null);
-      configs.add(new NamedValuesSourceConfigSpec<VS>(field, config));
+  protected List<NamedValuesSourceConfigSpec<VS>> resolveConfig(final SearchContext context) {
+    final List<NamedValuesSourceConfigSpec<VS>> configs = new ArrayList<>(this.fields.size());
+    for (final String field : this.fields) {
+      final ValuesSourceConfig<VS> config = config(context, field, null);
+      configs.add(new NamedValuesSourceConfigSpec<>(field, config));
     }
     return configs;
   }
@@ -245,43 +252,44 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
       List<NamedValuesSourceConfigSpec<VS>> configs, AggregatorFactory<?> parent,
       AggregatorFactories.Builder subFactoriesBuilder) throws IOException;
 
-  public ValuesSourceConfig<VS> config(SearchContext context, String field, Script script) {
+  public ValuesSourceConfig<VS> config(final SearchContext context, final String field,
+      final Script script) {
 
-    ValueType valueType = this.valueType != null ? this.valueType : targetValueType;
+    final ValueType valueType = this.valueType != null ? this.valueType : this.targetValueType;
 
     if (field == null) {
       if (script == null) {
-        ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(ValuesSourceType.ANY);
+        final ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(ValuesSourceType.ANY);
         return config.format(resolveFormat(null, valueType));
       }
       ValuesSourceType valuesSourceType =
           valueType != null ? valueType.getValuesSourceType() : this.valuesSourceType;
       if (valuesSourceType == null || valuesSourceType == ValuesSourceType.ANY) {
-        // the specific value source type is undefined, but for scripts,
+        // the specific value source modifier is undefined, but for scripts,
         // we need to have a specific value source
-        // type to know how to handle the script values, so we fallback
+        // modifier to know how to handle the script values, so we fallback
         // on Bytes
         valuesSourceType = ValuesSourceType.BYTES;
       }
-      ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(valuesSourceType);
-      config.missing(missingMap.get(field));
-      return config.format(resolveFormat(format, valueType));
+      final ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(valuesSourceType);
+      config.missing(this.missingMap.get(field));
+      return config.format(resolveFormat(this.format, valueType));
     }
 
-    MappedFieldType fieldType = context.smartNameFieldType(field);
+    final MappedFieldType fieldType = context.smartNameFieldType(field);
     if (fieldType == null) {
-      ValuesSourceType valuesSourceType =
+      final ValuesSourceType valuesSourceType =
           valueType != null ? valueType.getValuesSourceType() : this.valuesSourceType;
-      ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(valuesSourceType);
-      config.missing(missingMap.get(field));
-      config.format(resolveFormat(format, valueType));
+      final ValuesSourceConfig<VS> config = new ValuesSourceConfig<>(valuesSourceType);
+      config.missing(this.missingMap.get(field));
+      config.format(resolveFormat(this.format, valueType));
       return config.unmapped(true);
     }
 
-    IndexFieldData<?> indexFieldData = context.fieldData().getForField(fieldType);
+    final IndexFieldData<?> indexFieldData = context.fieldData().getForField(fieldType);
 
-    ValuesSourceConfig<VS> config;
-    if (valuesSourceType == ValuesSourceType.ANY) {
+    final ValuesSourceConfig<VS> config;
+    if (this.valuesSourceType == ValuesSourceType.ANY) {
       if (indexFieldData instanceof IndexNumericFieldData) {
         config = new ValuesSourceConfig<>(ValuesSourceType.NUMERIC);
       } else if (indexFieldData instanceof IndexGeoPointFieldData) {
@@ -290,16 +298,16 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
         config = new ValuesSourceConfig<>(ValuesSourceType.BYTES);
       }
     } else {
-      config = new ValuesSourceConfig<>(valuesSourceType);
+      config = new ValuesSourceConfig<>(this.valuesSourceType);
     }
 
     config.fieldContext(new FieldContext(field, indexFieldData, fieldType));
-    config.missing(missingMap.get(field));
-    return config.format(fieldType.docValueFormat(format, null));
+    config.missing(this.missingMap.get(field));
+    return config.format(fieldType.docValueFormat(this.format, null));
   }
 
-  private static DocValueFormat resolveFormat(@Nullable String format,
-      @Nullable ValueType valueType) {
+  private static DocValueFormat resolveFormat(@Nullable final String format,
+      @Nullable final ValueType valueType) {
     if (valueType == null) {
       return DocValueFormat.RAW; // we can't figure it out
     }
@@ -320,21 +328,21 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   }
 
   @Override
-  public final XContentBuilder internalXContent(XContentBuilder builder, Params params)
+  public final XContentBuilder internalXContent(final XContentBuilder builder, final Params params)
       throws IOException {
     builder.startObject();
     // todo add ParseField support to XContentBuilder
-    if (fields != null) {
-      builder.field(CommonFields.FIELDS.getPreferredName(), fields);
+    if (this.fields != null) {
+      builder.field(CommonFields.FIELDS.getPreferredName(), this.fields);
     }
-    if (missing != null) {
-      builder.field(CommonFields.MISSING.getPreferredName(), missing);
+    if (this.missing != null) {
+      builder.field(CommonFields.MISSING.getPreferredName(), this.missing);
     }
-    if (format != null) {
-      builder.field(CommonFields.FORMAT.getPreferredName(), format);
+    if (this.format != null) {
+      builder.field(CommonFields.FORMAT.getPreferredName(), this.format);
     }
-    if (valueType != null) {
-      builder.field(CommonFields.VALUE_TYPE.getPreferredName(), valueType.getPreferredName());
+    if (this.valueType != null) {
+      builder.field(CommonFields.VALUE_TYPE.getPreferredName(), this.valueType.getPreferredName());
     }
     doXContentBody(builder, params);
     builder.endObject();
@@ -346,31 +354,33 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
 
   @Override
   protected final int doHashCode() {
-    return Objects.hash(fields, format, missing, targetValueType, valueType, valuesSourceType,
+    return Objects.hash(this.fields, this.format, this.missing, this.targetValueType,
+        this.valueType,
+        this.valuesSourceType,
         innerHashCode());
   }
 
   protected abstract int innerHashCode();
 
   @Override
-  protected final boolean doEquals(Object obj) {
-    MultiValuesSourceAggregationBuilder<?, ?> other = (MultiValuesSourceAggregationBuilder<?, ?>) obj;
-    if (!Objects.equals(fields, other.fields)) {
+  protected final boolean doEquals(final Object obj) {
+    final MultiValuesSourceAggregationBuilder<?, ?> other = (MultiValuesSourceAggregationBuilder<?, ?>) obj;
+    if (!Objects.equals(this.fields, other.fields)) {
       return false;
     }
-    if (!Objects.equals(format, other.format)) {
+    if (!Objects.equals(this.format, other.format)) {
       return false;
     }
-    if (!Objects.equals(missing, other.missing)) {
+    if (!Objects.equals(this.missing, other.missing)) {
       return false;
     }
-    if (!Objects.equals(targetValueType, other.targetValueType)) {
+    if (!Objects.equals(this.targetValueType, other.targetValueType)) {
       return false;
     }
-    if (!Objects.equals(valueType, other.valueType)) {
+    if (!Objects.equals(this.valueType, other.valueType)) {
       return false;
     }
-    if (!Objects.equals(valuesSourceType, other.valuesSourceType)) {
+    if (!Objects.equals(this.valuesSourceType, other.valuesSourceType)) {
       return false;
     }
     return innerEquals(obj);

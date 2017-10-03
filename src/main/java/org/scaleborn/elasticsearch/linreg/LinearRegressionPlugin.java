@@ -26,6 +26,7 @@ import org.scaleborn.elasticsearch.linreg.aggregation.predict.PredictionAggregat
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.InternalStats;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationBuilder;
 import org.scaleborn.elasticsearch.linreg.aggregation.stats.StatsAggregationParser;
+import org.scaleborn.elasticsearch.linreg.functionscore.LinearRegressionErrorScoreFunctionBuilder;
 
 /**
  * Plugin definition for linear regression aggregations.
@@ -43,4 +44,12 @@ public class LinearRegressionPlugin extends Plugin implements SearchPlugin {
     return aggregations;
   }
 
+  @Override
+  public List<ScoreFunctionSpec<?>> getScoreFunctions() {
+    final List<ScoreFunctionSpec<?>> functionSpecs = new ArrayList<>();
+    functionSpecs.add(new ScoreFunctionSpec<>(LinearRegressionErrorScoreFunctionBuilder.NAME,
+        LinearRegressionErrorScoreFunctionBuilder::new,
+        LinearRegressionErrorScoreFunctionBuilder::fromXContent));
+    return functionSpecs;
+  }
 }
