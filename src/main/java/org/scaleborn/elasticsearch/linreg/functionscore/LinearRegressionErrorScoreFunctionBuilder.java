@@ -102,19 +102,17 @@ public class LinearRegressionErrorScoreFunctionBuilder extends
             }
             return true;
           }
-        } else if (token == Token.START_ARRAY) {
-          if ("coefficients".equals(currentFieldName)) {
-            while ((token = parser.nextToken()) != Token.END_ARRAY) {
-              if (token == Token.VALUE_NUMBER) {
-                coefficients.add(parser.doubleValue());
-              } else {
-                throw new ParsingException(parser.getTokenLocation(),
-                    "Unexpected token " + token + " [" + currentFieldName + "] in [" + builderName
-                        + "].");
-              }
+        } else if (token == Token.START_ARRAY && "coefficients".equals(currentFieldName)) {
+          while ((token = parser.nextToken()) != Token.END_ARRAY) {
+            if (token == Token.VALUE_NUMBER) {
+              coefficients.add(parser.doubleValue());
+            } else {
+              throw new ParsingException(parser.getTokenLocation(),
+                  "Unexpected token " + token + " [" + currentFieldName + "] in [" + builderName
+                      + "].");
             }
-            return true;
           }
+          return true;
         }
         return false;
       }
