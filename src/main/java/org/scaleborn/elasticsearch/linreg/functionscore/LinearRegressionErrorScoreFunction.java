@@ -115,21 +115,23 @@ public class LinearRegressionErrorScoreFunction extends ScoreFunction {
         // loop over fields
         for (int i = 0; i < fieldsCount; ++i) {
           final SortedNumericDoubleValues doubleValues = values[i];
-          final double value;
+          double value = 0;
+          int numValues = 0;
           if (doubleValues != null) {
             doubleValues.setDocument(docId);
-            final int numValues = doubleValues.count();
+            numValues = doubleValues.count();
             if (numValues > 0) {
               value = doubleValues.valueAt(0);
-              continue;
             }
           }
-          if (LinearRegressionErrorScoreFunction.this.missing[i] != null) {
-            value = LinearRegressionErrorScoreFunction.this.missing[i];
-          } else {
-            throw new ElasticsearchException(
-                "Missing value for field [" + LinearRegressionErrorScoreFunction.this.fields[i]
-                    + "]");
+          if (numValues <= 0) {
+            if (LinearRegressionErrorScoreFunction.this.missing[i] != null) {
+              value = LinearRegressionErrorScoreFunction.this.missing[i];
+            } else {
+              throw new ElasticsearchException(
+                  "Missing value for field [" + LinearRegressionErrorScoreFunction.this.fields[i]
+                      + "] in document [" + docId + "]");
+            }
           }
           this.fieldVals[i] = value;
         }
