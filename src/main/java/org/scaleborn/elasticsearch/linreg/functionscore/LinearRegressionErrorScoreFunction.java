@@ -57,9 +57,9 @@ public class LinearRegressionErrorScoreFunction extends ScoreFunction {
 
   private double error(final double[] values) {
     final int count = this.fields.length;
-    double error = this.coefficients[0] - values[count - 1];
+    double error = values[count - 1] - this.coefficients[0];
     for (int i = 1; i < count; i++) {
-      error += this.coefficients[i] * values[i - 1];
+      error -= this.coefficients[i] * values[i - 1];
     }
     return error;
   }

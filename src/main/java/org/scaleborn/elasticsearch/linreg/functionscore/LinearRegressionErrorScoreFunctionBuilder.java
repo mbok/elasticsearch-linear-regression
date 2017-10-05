@@ -228,7 +228,7 @@ public class LinearRegressionErrorScoreFunctionBuilder extends
       final MappedFieldType fieldType = context.getMapperService().fullName(field);
       IndexNumericFieldData fieldData = null;
       if (fieldType == null) {
-        if (!this.missing.containsKey(field)) {
+        if (this.missing == null || !this.missing.containsKey(field)) {
           throw new ElasticsearchException(
               "Unable to find a field mapper for field [" + field
                   + "] nor a 'missing' value defined for the field.");
