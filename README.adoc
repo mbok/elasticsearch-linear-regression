@@ -10,11 +10,22 @@ variables `x = (x~1~, x~2~,...,x~C~)` (called explanatory variables) based on a 
 
 image:http://latex.codecogs.com/gif.latex?h(x)%20=%20\theta_{0}%20+%20\sum_{j=1}^C%20\theta_{j}%20x_{j}[]
 
-This plugin enhances Elasticsearch's query engine by two new aggregations, which utilize the index data during search
-as training data for estimating a linear regression model in order to expose information like prediction of a value for the target variable,
-anomaly detection and measuring the accuracy or rather predictiveness of the model.
+This plugin enhances Elasticsearch's query engine by new aggregations and a score function to make use
+of linear regression for data stored in Elasticsearch.
+The aggregations utilize the index data during search
+as training data for estimating a linear regression model in order to expose information like:
+
+* prediction / forecasting of a value for the target variable,
+* anomaly detection,
+* and measuring the accuracy or rather predictiveness of the model.
+
 Estimation is performed regarding the https://en.wikipedia.org/wiki/Ordinary_least_squares[OLS]
 (ordinary least-squares) approach over the search result set.
+
+The score function allows to rank the documents given the coefficients of the estimated model
+by the error term. This may help
+* to identify breakouts or rather outliers,
+* to be used for recommending documents matching best the regression model.
 
 
 ## Aggregations
