@@ -12,6 +12,7 @@ image:http://latex.codecogs.com/gif.latex?h(x)%20=%20\theta_{0}%20+%20\sum_{j=1}
 
 This plugin enhances Elasticsearch's query engine by new aggregations and a score function to make use
 of linear regression for data stored in Elasticsearch.
+
 The <<aggregations,aggregations>> utilize the index data during search
 as training data for estimating a linear regression model in order to expose information like:
 
