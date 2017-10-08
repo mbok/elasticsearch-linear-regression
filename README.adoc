@@ -24,6 +24,7 @@ Estimation is performed regarding the https://en.wikipedia.org/wiki/Ordinary_lea
 
 The score function allows to rank the documents given the coefficients of the estimated model
 by the error term. This may help
+
 * to identify breakouts or rather outliers,
 * to be used for recommending documents matching best the regression model.
 
