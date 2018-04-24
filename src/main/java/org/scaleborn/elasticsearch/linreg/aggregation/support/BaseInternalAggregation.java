@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -199,5 +200,17 @@ public abstract class BaseInternalAggregation<S extends BaseSampling<S>, M exten
     final M buildResults = buildResults(composedSampling, slopeCoefficients,
         interceptCalculator.calculate(slopeCoefficients, composedSampling, composedSampling));
     return buildResults;
+  }
+
+  @Override
+  protected int doHashCode() {
+    return Objects.hash(this.sampling, this.results);
+  }
+
+  @Override
+  protected boolean doEquals(final Object obj) {
+    final BaseInternalAggregation other = (BaseInternalAggregation) obj;
+    return Objects.equals(this.sampling, other.sampling) &&
+        Objects.equals(this.results, other.results);
   }
 }

@@ -33,8 +33,7 @@ import org.elasticsearch.search.aggregations.LeafBucketCollectorBase;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregator;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.elasticsearch.search.aggregations.support.MultiValuesSource.NumericMultiValuesSource;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
-import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSource;
 import org.elasticsearch.search.internal.SearchContext;
 
 /**
@@ -54,12 +53,14 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
   private int fieldsCount;
 
   public BaseSamplingAggregator(final String name,
-      final List<NamedValuesSourceSpec<Numeric>> valuesSources,
+      final Map<String, ValuesSource.Numeric> valuesSources,
       final SearchContext context,
       final Aggregator parent, final MultiValueMode multiValueMode,
       final List<PipelineAggregator> pipelineAggregators,
       final Map<String, Object> metaData) throws IOException {
     super(name, context, parent, pipelineAggregators, metaData);
+    LOGGER.debug("Setting up aggregator for fields: {} ({})", valuesSources,
+        valuesSources.getClass());
     if (valuesSources != null && !valuesSources.isEmpty()) {
       this.valuesSources = new NumericMultiValuesSource(valuesSources, multiValueMode);
       this.samplings = context.bigArrays().newObjectArray(1);
@@ -85,7 +86,7 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
     for (int i = 0; i < this.fieldsCount; ++i) {
       values[i] = this.valuesSources.getField(i, ctx);
     }
-
+    LOGGER.debug("Starting sampling on fields: {}", this.valuesSources.fieldNames());
     return new LeafBucketCollectorBase(sub, values) {
       final double[] fieldVals = new double[BaseSamplingAggregator.this.fieldsCount];
 
@@ -112,16 +113,19 @@ public abstract class BaseSamplingAggregator<S extends BaseSampling<S>> extends 
       /**
        * return a map of field names and data
        */
-      private boolean includeDocument(final int doc) {
+      private boolean includeDocument(final int doc) throws IOException {
         // loop over fields
         for (int i = 0; i < BaseSamplingAggregator.this.fieldsCount; ++i) {
           final NumericDoubleValues doubleValues = values[i];
-          final double value = doubleValues.get(doc);
-          // skip if value is missing
-          if (value == Double.NEGATIVE_INFINITY) {
+          if (doubleValues.advanceExact(doc)) {
+            final double value = doubleValues.doubleValue();
+            if (value == Double.NEGATIVE_INFINITY) {
+              return false;
+            }
+            this.fieldVals[i] = value;
+          } else {
             return false;
           }
-          this.fieldVals[i] = value;
         }
         return true;
       }

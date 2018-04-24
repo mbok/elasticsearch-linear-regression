@@ -31,7 +31,7 @@ by the error term. This may help
 
 
 [[aggregations]]
-## Aggregations
+== Aggregations
 Both aggregations are numeric aggregations that estimate the linear regression coefficients
 image:http://latex.codecogs.com/gif.latex?\theta_0,%20\theta_1,%20\theta_2,.%20.%20.,%20\theta_C%20[]
 based on document results of a search query. Each search result
@@ -159,7 +159,60 @@ and the last for the response variable. The above request returns the following 
 }
 --------------------------------------------------
 
-=== Data conditions
+[[scoring]]
+== Scoring documents by error term
+[source,js]
+--------------------------------------------------
+/houses/_search?size=100
+{
+    "query": {
+        "function_score": {
+            "query": {
+                "match" : {
+                    "location" : "Morro Bay"
+                }
+            },
+            "linreg_error": {
+                "fields": ["size", "bedrooms", "bathrooms", "price"],
+                 "coefficients": [227990.63952712028, 248.92285661317254, -68297.7720278421, 64406.52205356777]
+                "modifier": "abs"
+            }
+        }
+    }
+}
+--------------------------------------------------
+
+[source,js]
+--------------------------------------------------
+{
+    ...
+    "hits":{
+        "total": 17,
+        "max_score": 1997108.1,
+        "hits":[
+            {
+                "_index": "houses",
+                "_type": "prices",
+                "_id": "da0772IBbA54ATAiBVjR",
+                "_score": 1997108.1,
+                "_source":{"message": "144316,Morro Bay,1045000.00,3,3,2100,497.62,Foreclosure\r", "bathrooms": 3, "bedrooms": 3, "path": "/home/mbok/linreg/RealEstate.csv",…}
+            },
+            ...,
+            {
+                "_index": "houses",
+                "_type": "prices",
+                "_id": "uq0772IBbA54ATAiBVjw",
+                "_score": 94489.49,
+                "_source":{"message": "137159,Morro Bay,999000.00,4,3,3360,297.32,Short Sale\r", "bathrooms": 3, "bedrooms": 4, "path": "/home/mbok/linreg/RealEstate.csv",…}
+            }
+        ]
+    }
+}
+--------------------------------------------------
+
+[none, abs, square, reciprocal, abs_reciprocal, square_reciprocal]
+
+== Data conditions
 Due to algorithmic constraints both aggregations result an empty response, if
 
 * the search result size is less or equal than the number of indicated explanatory variables,
@@ -167,7 +220,7 @@ Due to algorithmic constraints both aggregations result an empty response, if
   that a column can be written as a linear combination of the other columns).
 
 
-## Algorithm
+== Algorithm
 This implementation is based on a new parallel, single-pass OLS estimation algorithm for multiple linear regression
 (not yet published). By aggregating
 over the data only once and in parallel the algorithm is ideally suited for large-scale, distributed data sets and
@@ -177,9 +230,8 @@ The overall complexity of the implemented algorithm to estimate the regression c
 `N` denotes the size of the training data set (the number of documents in the search result set) and `C` the number
 of the indicated explanatory variables (fields).
 
-## Installation
+== Installation
 
-### Elasticsearch 5.x
 For installing this plugin please choose first the proper version under the compatible
 matrix which matches your Elasticsearch version and use the download link for the following command.
 
@@ -202,8 +254,8 @@ Do not forget to restart the node after installing.
 | https://github.com/scaleborn/elasticsearch-linear-regression/releases/download/5.3.0.1/elasticsearch-linear-regression-5.3.0.1.zip[5.3.0.1]        | 5.3.0 | Jun  30, 2017
 |===
 
-## Examples
-### Predicting house prices
+== Examples
+=== Predicting house prices
 The idea is very simple. We have data in our Elasticsearch index representing
 sold house prices in our region with some features like square footage of
 the house, # of bathrooms, # of bedrooms etc. Now we want to find out which
@@ -360,7 +412,7 @@ the most expensive region for our dream house:
 --------------------------------------------------
 
 
-## License
+== License
 Copyright 2017 Scaleborn UG (haftungsbeschränkt).
 
 Licensed under the Apache License 2.0.

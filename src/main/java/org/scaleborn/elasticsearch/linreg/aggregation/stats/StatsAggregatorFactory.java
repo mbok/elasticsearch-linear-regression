@@ -25,9 +25,8 @@ import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
 import org.elasticsearch.search.internal.SearchContext;
 
 /**
@@ -38,29 +37,30 @@ public class StatsAggregatorFactory extends
 
   private final MultiValueMode multiValueMode;
 
-  public StatsAggregatorFactory(String name,
-      List<NamedValuesSourceConfigSpec<Numeric>> configs, MultiValueMode multiValueMode,
-      SearchContext context, AggregatorFactory<?> parent,
-      AggregatorFactories.Builder subFactoriesBuilder,
-      Map<String, Object> metaData) throws IOException {
+  public StatsAggregatorFactory(final String name,
+      final Map<String, ValuesSourceConfig<Numeric>> configs, final MultiValueMode multiValueMode,
+      final SearchContext context, final AggregatorFactory<?> parent,
+      final AggregatorFactories.Builder subFactoriesBuilder,
+      final Map<String, Object> metaData) throws IOException {
     super(name, configs, context, parent, subFactoriesBuilder, metaData);
     this.multiValueMode = multiValueMode;
   }
 
   @Override
-  protected Aggregator createUnmapped(Aggregator parent,
-      List<PipelineAggregator> pipelineAggregators, Map<String, Object> metaData)
+  protected Aggregator createUnmapped(final Aggregator parent,
+      final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
       throws IOException {
-    return new StatsAggregator(name, null, context, parent, multiValueMode,
+    return new StatsAggregator(this.name, null, this.context, parent, this.multiValueMode,
         pipelineAggregators, metaData);
   }
 
   @Override
-  protected Aggregator doCreateInternal(List<NamedValuesSourceSpec<Numeric>> valuesSources,
-      Aggregator parent,
-      boolean collectsFromSingleBucket, List<PipelineAggregator> pipelineAggregators,
-      Map<String, Object> metaData) throws IOException {
-    return new StatsAggregator(name, valuesSources, context, parent, multiValueMode,
+  protected Aggregator doCreateInternal(final Map<String, Numeric> valuesSources,
+      final Aggregator parent,
+      final boolean collectsFromSingleBucket,
+      final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
+      throws IOException {
+    return new StatsAggregator(this.name, valuesSources, this.context, parent, this.multiValueMode,
         pipelineAggregators, metaData);
   }
 }

@@ -32,7 +32,6 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentParser.Token;
 import org.elasticsearch.index.fielddata.IndexNumericFieldData;
 import org.elasticsearch.index.mapper.MappedFieldType;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.scaleborn.elasticsearch.linreg.functionscore.LinearRegressionErrorScoreFunction.Modifier;
@@ -72,7 +71,7 @@ public class LinearRegressionErrorScoreFunctionBuilder extends
   }
 
   public static LinearRegressionErrorScoreFunctionBuilder fromXContent(
-      final QueryParseContext parseContext)
+      final XContentParser parser)
       throws IOException, ParsingException {
     final LinearRegressionErrorScoreFunctionBuilder builder = new LinearRegressionErrorScoreFunctionBuilder();
     final List<Double> coefficients = new ArrayList<>();
@@ -116,7 +115,7 @@ public class LinearRegressionErrorScoreFunctionBuilder extends
         }
         return false;
       }
-    }.parse(builder, "linreg_error", parseContext);
+    }.parse(builder, "linreg_error", parser);
     final double[] cs = new double[coefficients.size()];
     int i = 0;
     for (final double c : coefficients) {

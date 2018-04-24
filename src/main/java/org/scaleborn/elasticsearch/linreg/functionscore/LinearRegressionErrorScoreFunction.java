@@ -77,7 +77,7 @@ public class LinearRegressionErrorScoreFunction extends ScoreFunction {
       final double[] fieldVals = new double[fieldsCount];
 
       @Override
-      public double score(final int docId, final float subQueryScore) {
+      public double score(final int docId, final float subQueryScore) throws IOException {
         // get fields
         loadFieldVals(docId);
         // Calculate error
@@ -93,16 +93,14 @@ public class LinearRegressionErrorScoreFunction extends ScoreFunction {
       }
 
       @Override
-      public Explanation explainScore(final int docId, final Explanation subQueryScore) {
+      public Explanation explainScore(final int docId, final Explanation subQueryScore)
+          throws IOException {
         final String modifierStr =
             LinearRegressionErrorScoreFunction.this.modifier
                 != null ? LinearRegressionErrorScoreFunction.this.modifier.toString() : "";
-        final String defaultStr =
-            LinearRegressionErrorScoreFunction.this.missing
-                != null ? "?:" + LinearRegressionErrorScoreFunction.this.missing : "";
         final double score = score(docId, subQueryScore.getValue());
         return Explanation.match(
-            CombineFunction.toFloat(score),
+            (float) score,
             String.format(Locale.ROOT,
                 "linear regression error function: %s(fields=%s, coefficients=%s, missing=%s)",
                 modifierStr,
@@ -111,26 +109,22 @@ public class LinearRegressionErrorScoreFunction extends ScoreFunction {
                 Arrays.toString(LinearRegressionErrorScoreFunction.this.missing)));
       }
 
-      private void loadFieldVals(final int docId) {
+      private void loadFieldVals(final int docId) throws IOException {
         // loop over fields
         for (int i = 0; i < fieldsCount; ++i) {
           final SortedNumericDoubleValues doubleValues = values[i];
           double value = 0;
-          int numValues = 0;
           if (doubleValues != null) {
-            doubleValues.setDocument(docId);
-            numValues = doubleValues.count();
-            if (numValues > 0) {
-              value = doubleValues.valueAt(0);
-            }
-          }
-          if (numValues <= 0) {
-            if (LinearRegressionErrorScoreFunction.this.missing[i] != null) {
-              value = LinearRegressionErrorScoreFunction.this.missing[i];
+            if (doubleValues.advanceExact(docId)) {
+              value = doubleValues.nextValue();
             } else {
-              throw new ElasticsearchException(
-                  "Missing value for field [" + LinearRegressionErrorScoreFunction.this.fields[i]
-                      + "] in document [" + docId + "]");
+              if (LinearRegressionErrorScoreFunction.this.missing[i] != null) {
+                value = LinearRegressionErrorScoreFunction.this.missing[i];
+              } else {
+                throw new ElasticsearchException(
+                    "Missing value for field [" + LinearRegressionErrorScoreFunction.this.fields[i]
+                        + "] in document [" + docId + "]");
+              }
             }
           }
           this.fieldVals[i] = value;

@@ -21,13 +21,16 @@ package org.elasticsearch.search.aggregations.support;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.fielddata.IndexGeoPointFieldData;
@@ -45,54 +48,18 @@ import org.elasticsearch.search.internal.SearchContext;
 public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSource, AB extends MultiValuesSourceAggregationBuilder<VS, AB>>
     extends AbstractAggregationBuilder<AB> {
 
+  private static final Logger LOGGER = Loggers.getLogger(MultiValuesSourceAggregationBuilder.class);
   public static final ParseField MULTIVALUE_MODE_FIELD = new ParseField("mode");
-
-  public abstract static class LeafOnly<VS extends ValuesSource, AB extends MultiValuesSourceAggregationBuilder<VS, AB>>
-      extends MultiValuesSourceAggregationBuilder<VS, AB> {
-
-    protected LeafOnly(final String name, final ValuesSourceType valuesSourceType,
-        final ValueType targetValueType) {
-      super(name, valuesSourceType, targetValueType);
-    }
-
-    /**
-     * Read from a stream that does not serialize its targetValueType. This should be used by most
-     * subclasses.
-     */
-    protected LeafOnly(
-        final StreamInput in, final ValuesSourceType valuesSourceType,
-        final ValueType targetValueType)
-        throws IOException {
-      super(in, valuesSourceType, targetValueType);
-    }
-
-    /**
-     * Read an aggregation from a stream that serializes its targetValueType. This should only be
-     * used by subclasses that override {@link #serializeTargetValueType()} to return true.
-     */
-    protected LeafOnly(final StreamInput in, final ValuesSourceType valuesSourceType)
-        throws IOException {
-      super(in, valuesSourceType);
-    }
-
-    @Override
-    public AB subAggregations(final Builder subFactories) {
-      throw new AggregationInitializationException("Aggregator [" + this.name + "] of modifier [" +
-          getType() + "] cannot accept sub-aggregations");
-    }
-  }
-
   private final ValuesSourceType valuesSourceType;
   private final ValueType targetValueType;
+  private final Object missing = null;
   private List<String> fields = Collections.emptyList();
   private ValueType valueType = null;
   private String format = null;
-  private final Object missing = null;
   private Map<String, Object> missingMap = Collections.emptyMap();
 
   protected MultiValuesSourceAggregationBuilder(final String name,
-      final ValuesSourceType valuesSourceType,
-      final ValueType targetValueType) {
+      final ValuesSourceType valuesSourceType, final ValueType targetValueType) {
     super(name);
     if (valuesSourceType == null) {
       throw new IllegalArgumentException("[valuesSourceType] must not be null: [" + name + "]");
@@ -102,8 +69,7 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   }
 
   protected MultiValuesSourceAggregationBuilder(final StreamInput in,
-      final ValuesSourceType valuesSourceType,
-      final ValueType targetValueType)
+      final ValuesSourceType valuesSourceType, final ValueType targetValueType)
       throws IOException {
     super(in);
     assert false
@@ -114,13 +80,24 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   }
 
   protected MultiValuesSourceAggregationBuilder(final StreamInput in,
-      final ValuesSourceType valuesSourceType)
-      throws IOException {
+      final ValuesSourceType valuesSourceType) throws IOException {
     super(in);
     assert serializeTargetValueType() : "Wrong read constructor called for subclass that serializes its targetValueType";
     this.valuesSourceType = valuesSourceType;
     this.targetValueType = in.readOptionalWriteable(ValueType::readFromStream);
     read(in);
+  }
+
+  private static DocValueFormat resolveFormat(@Nullable final String format,
+      @Nullable final ValueType valueType) {
+    if (valueType == null) {
+      return DocValueFormat.RAW; // we can't figure it out
+    }
+    DocValueFormat valueFormat = valueType.defaultFormat();
+    if (valueFormat instanceof DocValueFormat.Decimal && format != null) {
+      valueFormat = new DocValueFormat.Decimal(format);
+    }
+    return valueFormat;
   }
 
   /**
@@ -159,7 +136,7 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
     if (fields == null) {
       throw new IllegalArgumentException("[field] must not be null: [" + this.name + "]");
     }
-    this.fields = fields;
+    this.fields = new ArrayList<>(fields);
     return (AB) this;
   }
 
@@ -233,23 +210,24 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   protected final MultiValuesSourceAggregatorFactory<VS, ?> doBuild(final SearchContext context,
       final AggregatorFactory<?> parent,
       final AggregatorFactories.Builder subFactoriesBuilder) throws IOException {
-    final List<NamedValuesSourceConfigSpec<VS>> configs = resolveConfig(context);
+    final Map<String, ValuesSourceConfig<VS>> configs = resolveConfig(context);
     final MultiValuesSourceAggregatorFactory<VS, ?> factory = innerBuild(context, configs, parent,
         subFactoriesBuilder);
     return factory;
   }
 
-  protected List<NamedValuesSourceConfigSpec<VS>> resolveConfig(final SearchContext context) {
-    final List<NamedValuesSourceConfigSpec<VS>> configs = new ArrayList<>(this.fields.size());
+  protected Map<String, ValuesSourceConfig<VS>> resolveConfig(final SearchContext context) {
+    final Map<String, ValuesSourceConfig<VS>> configs = new LinkedHashMap<>();
     for (final String field : this.fields) {
       final ValuesSourceConfig<VS> config = config(context, field, null);
-      configs.add(new NamedValuesSourceConfigSpec<>(field, config));
+      LOGGER.debug("Resolved config for field {}: {}", field, config);
+      configs.put(field, config);
     }
     return configs;
   }
 
   protected abstract MultiValuesSourceAggregatorFactory<VS, ?> innerBuild(SearchContext context,
-      List<NamedValuesSourceConfigSpec<VS>> configs, AggregatorFactory<?> parent,
+      Map<String, ValuesSourceConfig<VS>> configs, AggregatorFactory<?> parent,
       AggregatorFactories.Builder subFactoriesBuilder) throws IOException;
 
   public ValuesSourceConfig<VS> config(final SearchContext context, final String field,
@@ -265,9 +243,9 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
       ValuesSourceType valuesSourceType =
           valueType != null ? valueType.getValuesSourceType() : this.valuesSourceType;
       if (valuesSourceType == null || valuesSourceType == ValuesSourceType.ANY) {
-        // the specific value source modifier is undefined, but for scripts,
+        // the specific value source type is undefined, but for scripts,
         // we need to have a specific value source
-        // modifier to know how to handle the script values, so we fallback
+        // type to know how to handle the script values, so we fallback
         // on Bytes
         valuesSourceType = ValuesSourceType.BYTES;
       }
@@ -286,7 +264,7 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
       return config.unmapped(true);
     }
 
-    final IndexFieldData<?> indexFieldData = context.fieldData().getForField(fieldType);
+    final IndexFieldData<?> indexFieldData = context.getForField(fieldType);
 
     final ValuesSourceConfig<VS> config;
     if (this.valuesSourceType == ValuesSourceType.ANY) {
@@ -304,18 +282,6 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
     config.fieldContext(new FieldContext(field, indexFieldData, fieldType));
     config.missing(this.missingMap.get(field));
     return config.format(fieldType.docValueFormat(this.format, null));
-  }
-
-  private static DocValueFormat resolveFormat(@Nullable final String format,
-      @Nullable final ValueType valueType) {
-    if (valueType == null) {
-      return DocValueFormat.RAW; // we can't figure it out
-    }
-    DocValueFormat valueFormat = valueType.defaultFormat();
-    if (valueFormat instanceof DocValueFormat.Decimal && format != null) {
-      valueFormat = new DocValueFormat.Decimal(format);
-    }
-    return valueFormat;
   }
 
   /**
@@ -387,4 +353,38 @@ public abstract class MultiValuesSourceAggregationBuilder<VS extends ValuesSourc
   }
 
   protected abstract boolean innerEquals(Object obj);
+
+  public abstract static class LeafOnly<VS extends ValuesSource, AB extends MultiValuesSourceAggregationBuilder<VS, AB>>
+      extends MultiValuesSourceAggregationBuilder<VS, AB> {
+
+    protected LeafOnly(final String name, final ValuesSourceType valuesSourceType,
+        final ValueType targetValueType) {
+      super(name, valuesSourceType, targetValueType);
+    }
+
+    /**
+     * Read from a stream that does not serialize its targetValueType. This should be used by most
+     * subclasses.
+     */
+    protected LeafOnly(
+        final StreamInput in, final ValuesSourceType valuesSourceType,
+        final ValueType targetValueType) throws IOException {
+      super(in, valuesSourceType, targetValueType);
+    }
+
+    /**
+     * Read an aggregation from a stream that serializes its targetValueType. This should only be
+     * used by subclasses that override {@link #serializeTargetValueType()} to return true.
+     */
+    protected LeafOnly(final StreamInput in, final ValuesSourceType valuesSourceType)
+        throws IOException {
+      super(in, valuesSourceType);
+    }
+
+    @Override
+    public AB subAggregations(final Builder subFactories) {
+      throw new AggregationInitializationException("Aggregator [" + this.name + "] of type [" +
+          getType() + "] cannot accept sub-aggregations");
+    }
+  }
 }

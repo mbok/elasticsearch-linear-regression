@@ -17,13 +17,14 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.stats;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
+import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
 import org.elasticsearch.search.internal.SearchContext;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseAggregationBuilder;
 import org.scaleborn.linereg.sampling.exact.ExactModelSamplingFactory;
@@ -48,21 +49,6 @@ public class StatsAggregationBuilder extends
     super(in);
   }
 
-  @Override
-  protected StatsAggregatorFactory innerInnerBuild(final SearchContext context,
-      final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
-      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
-      throws IOException {
-    return new StatsAggregatorFactory(this.name, configs, multiValueMode, context, parent,
-        subFactoriesBuilder, this.metaData);
-  }
-
-
-  @Override
-  public String getType() {
-    return NAME;
-  }
-
   static StatsAggregationSampling buildSampling(final int featuresCount) {
     final ExactSamplingContext context = MODEL_SAMPLING_FACTORY
         .createContext(featuresCount);
@@ -72,5 +58,20 @@ public class StatsAggregationBuilder extends
         MODEL_SAMPLING_FACTORY.createInterceptSampling(context),
         MODEL_SAMPLING_FACTORY.createResponseVarianceTermSampling(context));
     return statsSampling;
+  }
+
+  @Override
+  protected MultiValuesSourceAggregatorFactory<Numeric, ?> innerInnerBuild(
+      final SearchContext context,
+      final Map<String, ValuesSourceConfig<Numeric>> configs, final MultiValueMode multiValueMode,
+      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
+      throws IOException {
+    return new StatsAggregatorFactory(this.name, configs, multiValueMode, context, parent,
+        subFactoriesBuilder, this.metaData);
+  }
+
+  @Override
+  public String getType() {
+    return NAME;
   }
 }

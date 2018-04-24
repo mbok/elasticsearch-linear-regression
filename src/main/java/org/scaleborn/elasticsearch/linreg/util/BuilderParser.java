@@ -25,7 +25,6 @@ import java.util.Map;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentParser.Token;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilder.CommonFields;
 import org.scaleborn.elasticsearch.linreg.util.BuilderParser.BaseBuilder;
@@ -43,10 +42,8 @@ public abstract class BuilderParser<B extends BaseBuilder> {
   }
 
   public final void parse(final B builder, final String builderName,
-      final QueryParseContext context)
+      final XContentParser parser)
       throws IOException {
-
-    final XContentParser parser = context.parser();
     List<String> fields = null;
     Map<String, Double> missingMap = null;
     Token token;

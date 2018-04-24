@@ -25,9 +25,8 @@ import org.elasticsearch.search.aggregations.AggregatorFactories.Builder;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
 import org.elasticsearch.search.internal.SearchContext;
 
 /**
@@ -40,7 +39,7 @@ public class PredictionAggregatorFactory extends
   private final double[] inputs;
 
   public PredictionAggregatorFactory(final String name,
-      final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
+      final Map<String, ValuesSourceConfig<Numeric>> configs, final MultiValueMode multiValueMode,
       final double[] inputs, final SearchContext context, final AggregatorFactory<?> parent,
       final Builder subFactoriesBuilder,
       final Map<String, Object> metaData) throws IOException {
@@ -59,12 +58,14 @@ public class PredictionAggregatorFactory extends
   }
 
   @Override
-  protected Aggregator doCreateInternal(final List<NamedValuesSourceSpec<Numeric>> valuesSources,
-      final Aggregator parent, final boolean collectsFromSingleBucket,
+  protected Aggregator doCreateInternal(final Map<String, Numeric> valuesSources,
+      final Aggregator parent,
+      final boolean collectsFromSingleBucket,
       final List<PipelineAggregator> pipelineAggregators, final Map<String, Object> metaData)
       throws IOException {
     return new PredictionAggregator(this.name, valuesSources, this.context, parent,
         this.multiValueMode, this.inputs,
         pipelineAggregators, metaData);
   }
+
 }

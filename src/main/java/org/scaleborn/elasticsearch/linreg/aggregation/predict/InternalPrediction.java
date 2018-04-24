@@ -19,6 +19,7 @@ package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -102,5 +103,16 @@ public class InternalPrediction extends
   @Override
   public String getWriteableName() {
     return PredictionAggregationBuilder.NAME;
+  }
+
+  @Override
+  protected int doHashCode() {
+    return super.doHashCode() + Objects.hash(this.inputs);
+  }
+
+  @Override
+  protected boolean doEquals(final Object obj) {
+    final InternalPrediction other = (InternalPrediction) obj;
+    return super.doEquals(obj) && Objects.equals(this.inputs, other.inputs);
   }
 }

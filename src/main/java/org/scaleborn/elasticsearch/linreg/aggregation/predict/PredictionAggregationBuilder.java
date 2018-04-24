@@ -17,16 +17,17 @@
 package org.scaleborn.elasticsearch.linreg.aggregation.predict;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.search.MultiValueMode;
-import org.elasticsearch.search.aggregations.AggregatorFactories.Builder;
+import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
+import org.elasticsearch.search.aggregations.support.ValuesSource;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
 import org.elasticsearch.search.internal.SearchContext;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseAggregationBuilder;
 import org.scaleborn.linereg.sampling.exact.ExactModelSamplingFactory;
@@ -60,10 +61,11 @@ public class PredictionAggregationBuilder extends
   }
 
   @Override
-  protected MultiValuesSourceAggregatorFactory<Numeric, ?> innerInnerBuild(
+  protected MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerInnerBuild(
       final SearchContext context,
-      final List<NamedValuesSourceConfigSpec<Numeric>> configs, final MultiValueMode multiValueMode,
-      final AggregatorFactory<?> parent, final Builder subFactoriesBuilder) throws IOException {
+      final Map<String, ValuesSourceConfig<Numeric>> configs, final MultiValueMode multiValueMode,
+      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
+      throws IOException {
     if (this.inputs == null || this.inputs.length != configs.size() - 1) {
       throw new IllegalArgumentException(
           "[inputs] must have [" + (configs.size() - 1)

@@ -23,7 +23,6 @@ import org.elasticsearch.search.MultiValueMode;
 import org.elasticsearch.search.aggregations.Aggregator;
 import org.elasticsearch.search.aggregations.InternalAggregation;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceSpec;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
 import org.elasticsearch.search.internal.SearchContext;
 import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseSamplingAggregator;
@@ -34,7 +33,7 @@ import org.scaleborn.elasticsearch.linreg.aggregation.support.BaseSamplingAggreg
 public class StatsAggregator extends BaseSamplingAggregator<StatsAggregationSampling> {
 
   public StatsAggregator(final String name,
-      final List<NamedValuesSourceSpec<Numeric>> valuesSources,
+      final Map<String, Numeric> valuesSources,
       final SearchContext context,
       final Aggregator parent,
       final MultiValueMode multiValueMode,

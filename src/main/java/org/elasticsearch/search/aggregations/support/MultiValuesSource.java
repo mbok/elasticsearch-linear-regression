@@ -19,12 +19,10 @@
 package org.elasticsearch.search.aggregations.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import org.apache.lucene.index.LeafReaderContext;
 import org.elasticsearch.index.fielddata.NumericDoubleValues;
 import org.elasticsearch.search.MultiValueMode;
-import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
 
 /**
  * Class to encapsulate a set of ValuesSource objects labeled by field name
@@ -35,64 +33,17 @@ public abstract class MultiValuesSource<VS extends ValuesSource> {
   protected String[] names;
   protected VS[] values;
 
-  public static class NumericMultiValuesSource extends MultiValuesSource<ValuesSource.Numeric> {
-
-    public NumericMultiValuesSource(List<NamedValuesSourceSpec<Numeric>> valuesSources,
-        MultiValueMode multiValueMode) {
-      super(valuesSources, multiValueMode, new ValuesSource.Numeric[0]);
-    }
-
-    public NumericDoubleValues getField(final int ordinal, LeafReaderContext ctx)
-        throws IOException {
-      if (ordinal > names.length) {
-        throw new IndexOutOfBoundsException(
-            "ValuesSource array index " + ordinal + " out of bounds");
-      }
-      return multiValueMode.select(values[ordinal].doubleValues(ctx), Double.NEGATIVE_INFINITY);
-    }
-  }
-
-  public static class BytesMultiValuesSource extends MultiValuesSource<ValuesSource.Bytes> {
-
-    public BytesMultiValuesSource(List<NamedValuesSourceSpec<ValuesSource.Bytes>> valuesSources,
-        MultiValueMode multiValueMode) {
-      super(valuesSources, multiValueMode, new ValuesSource.Bytes[0]);
-    }
-
-    public Object getField(final int ordinal, LeafReaderContext ctx) throws IOException {
-      return values[ordinal].bytesValues(ctx);
-    }
-  }
-
-  public static class GeoPointValuesSource extends MultiValuesSource<ValuesSource.GeoPoint> {
-
-    public GeoPointValuesSource(List<NamedValuesSourceSpec<ValuesSource.GeoPoint>> valuesSources,
-        MultiValueMode multiValueMode) {
-      super(valuesSources, multiValueMode, new ValuesSource.GeoPoint[0]);
-    }
-  }
-
-  private MultiValuesSource(List<? extends NamedValuesSourceSpec<VS>> valuesSources,
-      MultiValueMode multiValueMode, VS[] emptyArray) {
+  private MultiValuesSource(final Map<String, ?> valuesSources,
+      final MultiValueMode multiValueMode) {
     if (valuesSources != null) {
-      this.names = new String[valuesSources.size()];
-      List<VS> valuesList = new ArrayList<VS>(valuesSources.size());
-      int i = 0;
-      for (NamedValuesSourceSpec<VS> spec : valuesSources) {
-        this.names[i++] = spec.getName();
-        valuesList.add(spec.getValuesSource());
-      }
-      this.values = valuesList.toArray(emptyArray);
-    } else {
-      this.names = new String[0];
-      this.values = emptyArray;
+      this.names = valuesSources.keySet().toArray(new String[0]);
     }
     this.multiValueMode = multiValueMode;
   }
 
   public boolean needsScores() {
     boolean needsScores = false;
-    for (ValuesSource value : values) {
+    for (final ValuesSource value : this.values) {
       needsScores |= value.needsScores();
     }
     return needsScores;
@@ -100,5 +51,50 @@ public abstract class MultiValuesSource<VS extends ValuesSource> {
 
   public String[] fieldNames() {
     return this.names;
+  }
+
+  public static class NumericMultiValuesSource extends MultiValuesSource<ValuesSource.Numeric> {
+
+    public NumericMultiValuesSource(final Map<String, ValuesSource.Numeric> valuesSources,
+        final MultiValueMode multiValueMode) {
+      super(valuesSources, multiValueMode);
+      if (valuesSources != null) {
+        this.values = valuesSources.values().toArray(new ValuesSource.Numeric[0]);
+      } else {
+        this.values = new ValuesSource.Numeric[0];
+      }
+    }
+
+    public NumericDoubleValues getField(final int ordinal, final LeafReaderContext ctx)
+        throws IOException {
+      if (ordinal > this.names.length) {
+        throw new IndexOutOfBoundsException(
+            "ValuesSource array index " + ordinal + " out of bounds");
+      }
+      return this.multiValueMode
+          .select(this.values[ordinal].doubleValues(ctx), Double.NEGATIVE_INFINITY);
+    }
+  }
+
+  public static class BytesMultiValuesSource extends MultiValuesSource<ValuesSource.Bytes> {
+
+    public BytesMultiValuesSource(final Map<String, ValuesSource.Bytes> valuesSources,
+        final MultiValueMode multiValueMode) {
+      super(valuesSources, multiValueMode);
+      this.values = valuesSources.values().toArray(new ValuesSource.Bytes[0]);
+    }
+
+    public Object getField(final int ordinal, final LeafReaderContext ctx) throws IOException {
+      return this.values[ordinal].bytesValues(ctx);
+    }
+  }
+
+  public static class GeoPointValuesSource extends MultiValuesSource<ValuesSource.GeoPoint> {
+
+    public GeoPointValuesSource(final Map<String, ValuesSource.GeoPoint> valuesSources,
+        final MultiValueMode multiValueMode) {
+      super(valuesSources, multiValueMode);
+      this.values = valuesSources.values().toArray(new ValuesSource.GeoPoint[0]);
+    }
   }
 }

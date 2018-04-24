@@ -20,7 +20,8 @@
 package org.elasticsearch.search.aggregations.support;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.elasticsearch.search.aggregations.Aggregator;
@@ -32,27 +33,27 @@ import org.elasticsearch.search.internal.SearchContext;
 public abstract class MultiValuesSourceAggregatorFactory<VS extends ValuesSource, AF extends MultiValuesSourceAggregatorFactory<VS, AF>>
     extends AggregatorFactory<AF> {
 
-  protected List<NamedValuesSourceConfigSpec<VS>> configs;
+  protected Map<String, ValuesSourceConfig<VS>> configs;
 
-  public MultiValuesSourceAggregatorFactory(String name,
-      List<NamedValuesSourceConfigSpec<VS>> configs,
-      SearchContext context, AggregatorFactory<?> parent,
-      AggregatorFactories.Builder subFactoriesBuilder,
-      Map<String, Object> metaData) throws IOException {
+  public MultiValuesSourceAggregatorFactory(final String name,
+      final Map<String, ValuesSourceConfig<VS>> configs,
+      final SearchContext context, final AggregatorFactory<?> parent,
+      final AggregatorFactories.Builder subFactoriesBuilder,
+      final Map<String, Object> metaData) throws IOException {
     super(name, context, parent, subFactoriesBuilder, metaData);
     this.configs = configs;
   }
 
   @Override
-  public Aggregator createInternal(Aggregator parent, boolean collectsFromSingleBucket,
-      List<PipelineAggregator> pipelineAggregators,
-      Map<String, Object> metaData) throws IOException {
-    List<NamedValuesSourceSpec<VS>> valuesSources = new ArrayList<>();
+  public Aggregator createInternal(final Aggregator parent, final boolean collectsFromSingleBucket,
+      final List<PipelineAggregator> pipelineAggregators,
+      final Map<String, Object> metaData) throws IOException {
+    final HashMap<String, VS> valuesSources = new LinkedHashMap<>();
 
-    for (NamedValuesSourceConfigSpec<VS> config : configs) {
-      VS vs = config.getConfig().toValuesSource(context.getQueryShardContext());
+    for (final Map.Entry<String, ValuesSourceConfig<VS>> config : this.configs.entrySet()) {
+      final VS vs = config.getValue().toValuesSource(this.context.getQueryShardContext());
       if (vs != null) {
-        valuesSources.add(new NamedValuesSourceSpec<>(config.getName(), vs));
+        valuesSources.put(config.getKey(), vs);
       }
     }
     if (valuesSources.isEmpty()) {
@@ -66,8 +67,7 @@ public abstract class MultiValuesSourceAggregatorFactory<VS extends ValuesSource
       List<PipelineAggregator> pipelineAggregators,
       Map<String, Object> metaData) throws IOException;
 
-  protected abstract Aggregator doCreateInternal(List<NamedValuesSourceSpec<VS>> valuesSources,
-      Aggregator parent,
+  protected abstract Aggregator doCreateInternal(Map<String, VS> valuesSources, Aggregator parent,
       boolean collectsFromSingleBucket,
       List<PipelineAggregator> pipelineAggregators, Map<String, Object> metaData)
       throws IOException;

@@ -18,8 +18,11 @@ package org.scaleborn.elasticsearch.linreg.aggregation.support;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.MultiValueMode;
@@ -27,10 +30,10 @@ import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregationBuilder;
 import org.elasticsearch.search.aggregations.support.MultiValuesSourceAggregatorFactory;
-import org.elasticsearch.search.aggregations.support.NamedValuesSourceConfigSpec;
 import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.aggregations.support.ValuesSource;
 import org.elasticsearch.search.aggregations.support.ValuesSource.Numeric;
+import org.elasticsearch.search.aggregations.support.ValuesSourceConfig;
 import org.elasticsearch.search.aggregations.support.ValuesSourceType;
 import org.elasticsearch.search.internal.SearchContext;
 
@@ -39,6 +42,8 @@ import org.elasticsearch.search.internal.SearchContext;
  */
 public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>> extends
     MultiValuesSourceAggregationBuilder.LeafOnly<ValuesSource.Numeric, S> {
+
+  private static final Logger LOGGER = Loggers.getLogger(BaseAggregationBuilder.class);
 
   private MultiValueMode multiValueMode = MultiValueMode.AVG;
 
@@ -64,17 +69,16 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
   }
 
   @Override
-  protected final MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerBuild(
+  protected MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerBuild(
       final SearchContext context,
-      final List<NamedValuesSourceConfigSpec<Numeric>> configs,
-      final AggregatorFactory<?> parent, final AggregatorFactories.Builder subFactoriesBuilder)
-      throws IOException {
+      final Map<String, ValuesSourceConfig<Numeric>> configs, final AggregatorFactory<?> parent,
+      final AggregatorFactories.Builder subFactoriesBuilder) throws IOException {
     return innerInnerBuild(context, configs, this.multiValueMode, parent, subFactoriesBuilder);
   }
 
   protected abstract MultiValuesSourceAggregatorFactory<ValuesSource.Numeric, ?> innerInnerBuild(
       SearchContext context,
-      List<NamedValuesSourceConfigSpec<Numeric>> configs, MultiValueMode multiValueMode,
+      Map<String, ValuesSourceConfig<Numeric>> configs, MultiValueMode multiValueMode,
       AggregatorFactory<?> parent, AggregatorFactories.Builder subFactoriesBuilder)
       throws IOException;
 
@@ -90,6 +94,7 @@ public abstract class BaseAggregationBuilder<S extends BaseAggregationBuilder<S>
   @Override
   public S fields(final List<String> fields) {
     super.fields(fields);
+    LOGGER.debug("Setting fields for aggregation: {}", fields);
     if (fields.size() < 2) {
       throw new IllegalArgumentException(
           "[fields] must reference at least two fields (multiple features and the response as the last field): ["

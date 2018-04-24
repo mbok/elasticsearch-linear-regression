@@ -28,7 +28,6 @@ import java.util.Map;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilder.CommonFields;
 import org.elasticsearch.search.aggregations.Aggregator;
@@ -36,55 +35,22 @@ import org.elasticsearch.search.aggregations.Aggregator;
 public abstract class MultiValuesSourceParser<VS extends ValuesSource> implements
     Aggregator.Parser {
 
-  public abstract static class AnyValuesSourceParser extends MultiValuesSourceParser<ValuesSource> {
-
-    protected AnyValuesSourceParser(final boolean formattable) {
-      super(formattable, ValuesSourceType.ANY, null);
-    }
-  }
-
-  public abstract static class NumericValuesSourceParser extends
-      MultiValuesSourceParser<ValuesSource.Numeric> {
-
-    protected NumericValuesSourceParser(final boolean formattable) {
-      super(formattable, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
-    }
-  }
-
-  public abstract static class BytesValuesSourceParser extends
-      MultiValuesSourceParser<ValuesSource.Bytes> {
-
-    protected BytesValuesSourceParser(final boolean formattable) {
-      super(formattable, ValuesSourceType.BYTES, ValueType.STRING);
-    }
-  }
-
-  public abstract static class GeoPointValuesSourceParser extends
-      MultiValuesSourceParser<ValuesSource.GeoPoint> {
-
-    protected GeoPointValuesSourceParser(final boolean formattable) {
-      super(formattable, ValuesSourceType.GEOPOINT, ValueType.GEOPOINT);
-    }
-  }
-
   private boolean formattable = false;
   private ValuesSourceType valuesSourceType = null;
   private ValueType targetValueType = null;
 
   private MultiValuesSourceParser(final boolean formattable,
-      final ValuesSourceType valuesSourceType,
-      final ValueType targetValueType) {
+      final ValuesSourceType valuesSourceType, final ValueType targetValueType) {
     this.valuesSourceType = valuesSourceType;
     this.targetValueType = targetValueType;
     this.formattable = formattable;
   }
 
   @Override
-  public final MultiValuesSourceAggregationBuilder<VS, ?> parse(final String aggregationName,
-      final QueryParseContext context)
+  public final MultiValuesSourceAggregationBuilder<VS, ?> parse(
+      final String aggregationName, final XContentParser parser)
       throws IOException {
 
-    final XContentParser parser = context.parser();
     List<String> fields = null;
     final ValueType valueType = null;
     String format = null;
@@ -203,8 +169,8 @@ public abstract class MultiValuesSourceParser<VS extends ValuesSource> implement
    * after it has been returned by this method.
    *
    * @param aggregationName the name of the aggregation
-   * @param valuesSourceType the modifier of the {@link ValuesSource}
-   * @param targetValueType the target modifier of the final value output by the aggregation
+   * @param valuesSourceType the type of the {@link ValuesSource}
+   * @param targetValueType the target type of the final value output by the aggregation
    * @param otherOptions a {@link Map} containing the extra options parsed by the {@link
    * #token(String, String, XContentParser.Token, XContentParser, Map)} method
    * @return the created factory
@@ -232,4 +198,35 @@ public abstract class MultiValuesSourceParser<VS extends ValuesSource> implement
   protected abstract boolean token(String aggregationName, String currentFieldName,
       XContentParser.Token token, XContentParser parser,
       Map<ParseField, Object> otherOptions) throws IOException;
+
+  public abstract static class AnyValuesSourceParser extends MultiValuesSourceParser<ValuesSource> {
+
+    protected AnyValuesSourceParser(final boolean formattable) {
+      super(formattable, ValuesSourceType.ANY, null);
+    }
+  }
+
+  public abstract static class NumericValuesSourceParser extends
+      MultiValuesSourceParser<ValuesSource.Numeric> {
+
+    protected NumericValuesSourceParser(final boolean formattable) {
+      super(formattable, ValuesSourceType.NUMERIC, ValueType.NUMERIC);
+    }
+  }
+
+  public abstract static class BytesValuesSourceParser extends
+      MultiValuesSourceParser<ValuesSource.Bytes> {
+
+    protected BytesValuesSourceParser(final boolean formattable) {
+      super(formattable, ValuesSourceType.BYTES, ValueType.STRING);
+    }
+  }
+
+  public abstract static class GeoPointValuesSourceParser extends
+      MultiValuesSourceParser<ValuesSource.GeoPoint> {
+
+    protected GeoPointValuesSourceParser(final boolean formattable) {
+      super(formattable, ValuesSourceType.GEOPOINT, ValueType.GEOPOINT);
+    }
+  }
 }
