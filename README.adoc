@@ -23,7 +23,7 @@ as training data for estimating a linear regression model in order to expose inf
 Estimation is performed regarding the https://en.wikipedia.org/wiki/Ordinary_least_squares[OLS]
 (ordinary least-squares) approach over the search result set.
 
-The <<score-function,score function>> allows to rank the documents given the coefficients of the estimated model
+The <<scoring,score-function>> allows to rank the documents given the coefficients of the estimated model
 by the error term. This may help
 
 * to identify breakouts or rather outliers,
@@ -161,6 +161,20 @@ and the last for the response variable. The above request returns the following 
 
 [[scoring]]
 == Scoring documents by error term
+The `linreg_error` score function allows you to rank documents that are retrieved by a query
+by the error term regarding a previously estimated linear regression model.
+For each search result document the error term is computed by multiplying values of
+the defined numerical fields
+with given regression coefficients.
+If used on a multi-valued field, only the first value of the field is used in calculations.
+
+Assuming again the data consists of documents representing sold house prices with features
+ like number of bedrooms, bathrooms and size etc. we estimate the linear regression
+ model by using the `linreg_stats` aggregation a got the
+ can let predict or validate
+ the price for our house in Morro Bay with 2000 square feet, 4 bedrooms and 2 bathrooms by:
+
+
 [source,js]
 --------------------------------------------------
 /houses/_search?size=100
@@ -413,6 +427,6 @@ the most expensive region for our dream house:
 
 
 == License
-Copyright 2017 Scaleborn UG (haftungsbeschränkt).
+Copyright 2018 Scaleborn UG (haftungsbeschränkt).
 
 Licensed under the Apache License 2.0.
