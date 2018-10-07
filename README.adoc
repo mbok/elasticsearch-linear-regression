@@ -1,6 +1,6 @@
 # A multiple linear regression plugin for Elasticsearch
 
-image:https://travis-ci.org/scaleborn/elasticsearch-linear-regression.svg?branch=master["Build Status", link="https://travis-ci.org/scaleborn/elasticsearch-linear-regression"]
+image:https://travis-ci.org/mbok/elasticsearch-linear-regression.svg?branch=master["Build Status", link="https://travis-ci.org/mbok/elasticsearch-linear-regression"]
 
 Linear regression model has been a mainstay of statistics and machine learning
 in the past decades and remains one of the most important tools in context of supervised learning algorithms.
